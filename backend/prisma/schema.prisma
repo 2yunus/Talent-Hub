@@ -1,0 +1,155 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  password     String
+  firstName    String
+  lastName     String
+  role         UserRole @default(DEVELOPER)
+  bio          String?
+  avatar       String?
+  location     String?
+  skills       String[]
+  experience   String?
+  education    String?
+  website      String?
+  github       String?
+  linkedin     String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  jobsPosted     Job[]          @relation("JobPoster")
+  applications   Application[]
+  company        Company?       @relation("CompanyOwner")
+
+  @@map("users")
+}
+
+model Company {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  logo        String?
+  website     String?
+  location    String?
+  industry    String?
+  size        CompanySize?
+  founded     Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  owner       User     @relation("CompanyOwner", fields: [ownerId], references: [id])
+  ownerId     String   @unique
+  jobs        Job[]    @relation("CompanyJobs")
+
+  @@map("companies")
+}
+
+model Job {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  requirements String[]
+  responsibilities String[]
+  salary      SalaryRange?
+  location    String
+  type        JobType
+  experience  ExperienceLevel
+  skills      String[]
+  benefits    String[]
+  companyName String
+  companyLogo String?
+  isRemote    Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  postedBy    User          @relation("JobPoster", fields: [postedById], references: [id])
+  postedById  String
+  company     Company?      @relation("CompanyJobs", fields: [companyId], references: [id])
+  companyId   String?
+  applications Application[]
+
+  @@map("jobs")
+}
+
+model Application {
+  id        String           @id @default(cuid())
+  status    ApplicationStatus @default(PENDING)
+  coverLetter String?
+  resume    String?
+  appliedAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  // Relations
+  job       Job              @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobId     String
+  applicant User             @relation(fields: [applicantId], references: [id], onDelete: Cascade)
+  applicantId String
+
+  @@unique([jobId, applicantId])
+  @@map("applications")
+}
+
+enum UserRole {
+  DEVELOPER
+  EMPLOYER
+  ADMIN
+}
+
+enum CompanySize {
+  STARTUP
+  SMALL
+  MEDIUM
+  LARGE
+  ENTERPRISE
+}
+
+enum JobType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERNSHIP
+  FREELANCE
+}
+
+enum ExperienceLevel {
+  ENTRY
+  JUNIOR
+  MID_LEVEL
+  SENIOR
+  LEAD
+  EXECUTIVE
+}
+
+enum ApplicationStatus {
+  PENDING
+  REVIEWING
+  INTERVIEWING
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+}
+
+enum SalaryRange {
+  UNDER_30K
+  THIRTY_TO_50K
+  FIFTY_TO_70K
+  SEVENTY_TO_90K
+  NINETY_TO_110K
+  OVER_110K
+}

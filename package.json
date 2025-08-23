@@ -1,0 +1,43 @@
+{
+  "name": "talenthub",
+  "version": "1.0.0",
+  "description": "A comprehensive job platform connecting developers with opportunities",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && npm run dev",
+    "build": "npm run build:frontend && npm run build:backend",
+    "build:frontend": "cd frontend && npm run build",
+    "build:backend": "cd backend && npm run build",
+    "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
+    "start:frontend": "cd frontend && npm run start",
+    "start:backend": "cd backend && npm run start",
+    "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install",
+    "db:generate": "cd backend && npm run prisma:generate",
+    "db:push": "cd backend && npm run prisma:push",
+    "db:migrate": "cd backend && npm run prisma:migrate",
+    "db:studio": "cd backend && npm run prisma:studio"
+  },
+  "keywords": [
+    "job-platform",
+    "developer-jobs",
+    "nextjs",
+    "express",
+    "prisma",
+    "postgresql"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  }
+}
