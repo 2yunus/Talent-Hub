@@ -18,7 +18,18 @@ model User {
   lastName     String
   role         UserRole @default(DEVELOPER)
   bio          String?
+  
+  // File Uploads
   avatar       String?
+  avatarFileName String?
+  avatarFileSize Int?
+  
+  // Resume (for developers)
+  resume       String?
+  resumeFileName String?
+  resumeFileSize Int?
+  resumeFileType String?
+  
   location     String?
   skills       String[]
   experience   String?
@@ -41,7 +52,13 @@ model Company {
   id          String   @id @default(cuid())
   name        String
   description String?
+  
+  // File Uploads
   logo        String?
+  logoFileName String?
+  logoFileSize Int?
+  logoFileType String?
+  
   website     String?
   location    String?
   industry    String?
@@ -64,7 +81,7 @@ model Job {
   description String
   requirements String[]
   responsibilities String[]
-  salary      SalaryRange?
+  salary      Json? // Store as JSON object with min, max, currency
   location    String
   type        JobType
   experience  ExperienceLevel
@@ -91,7 +108,17 @@ model Application {
   id        String           @id @default(cuid())
   status    ApplicationStatus @default(PENDING)
   coverLetter String?
+  
+  // File Uploads
   resume    String?
+  resumeFileName String?
+  resumeFileSize Int?
+  resumeFileType String?
+  
+  // Additional Files
+  portfolio String?
+  coverLetterFile String?
+  
   appliedAt DateTime         @default(now())
   updatedAt DateTime         @updatedAt
 
@@ -130,7 +157,7 @@ enum JobType {
 enum ExperienceLevel {
   ENTRY
   JUNIOR
-  MID_LEVEL
+  MID
   SENIOR
   LEAD
   EXECUTIVE
@@ -145,11 +172,4 @@ enum ApplicationStatus {
   WITHDRAWN
 }
 
-enum SalaryRange {
-  UNDER_30K
-  THIRTY_TO_50K
-  FIFTY_TO_70K
-  SEVENTY_TO_90K
-  NINETY_TO_110K
-  OVER_110K
-}
+

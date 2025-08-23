@@ -3,6 +3,8 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const dotenv = require('dotenv');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpecs = require('./config/swagger');
 
 // Load environment variables
 dotenv.config();
@@ -53,14 +55,35 @@ app.get('/health', (req, res) => {
   });
 });
 
-// API routes (will be added in Phase 2)
-app.use('/api/auth', (req, res) => {
-  res.json({ message: 'Auth routes coming soon!' });
+// Swagger UI
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'TalentHub API Documentation',
+  customfavIcon: '/favicon.ico',
+  swaggerOptions: {
+    persistAuthorization: true,
+    displayRequestDuration: true,
+    filter: true,
+    deepLinking: true
+  }
+}));
+
+// API documentation JSON endpoint
+app.get('/api-docs.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerSpecs);
 });
 
-app.use('/api/jobs', (req, res) => {
-  res.json({ message: 'Jobs routes coming soon!' });
-});
+// Import routes
+const authRoutes = require('./routes/auth');
+const jobRoutes = require('./routes/jobs');
+
+// Make Prisma client available to middleware
+app.locals.prisma = new (require('@prisma/client')).PrismaClient();
+
+// API routes
+app.use('/api/auth', authRoutes);
+app.use('/api/jobs', jobRoutes);
 
 app.use('/api/applications', (req, res) => {
   res.json({ message: 'Applications routes coming soon!' });
