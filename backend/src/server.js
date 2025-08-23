@@ -77,6 +77,7 @@ app.get('/api-docs.json', (req, res) => {
 // Import routes
 const authRoutes = require('./routes/auth');
 const jobRoutes = require('./routes/jobs');
+const applicationRoutes = require('./routes/applications');
 
 // Make Prisma client available to middleware
 app.locals.prisma = new (require('@prisma/client')).PrismaClient();
@@ -84,10 +85,7 @@ app.locals.prisma = new (require('@prisma/client')).PrismaClient();
 // API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/jobs', jobRoutes);
-
-app.use('/api/applications', (req, res) => {
-  res.json({ message: 'Applications routes coming soon!' });
-});
+app.use('/api/applications', applicationRoutes);
 
 app.use('/api/users', (req, res) => {
   res.json({ message: 'Users routes coming soon!' });

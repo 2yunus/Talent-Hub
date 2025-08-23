@@ -842,6 +842,92 @@ const options = {
               }
             }
           }
+        },
+
+        // Application schema
+        Application: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              description: 'Unique application identifier',
+              example: 'clx1234567890abcdef'
+            },
+            status: {
+              type: 'string',
+              enum: ['PENDING', 'REVIEWING', 'INTERVIEWING', 'ACCEPTED', 'REJECTED', 'WITHDRAWN'],
+              description: 'Application status',
+              example: 'PENDING'
+            },
+            coverLetter: {
+              type: 'string',
+              maxLength: 2000,
+              description: 'Cover letter content',
+              example: 'I am excited to apply for this position...'
+            },
+            resume: {
+              type: 'string',
+              format: 'uri',
+              description: 'URL to applicant resume',
+              example: 'https://example.com/resume.pdf'
+            },
+            portfolio: {
+              type: 'string',
+              format: 'uri',
+              description: 'URL to applicant portfolio',
+              example: 'https://github.com/username'
+            },
+            appliedAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Application submission date',
+              example: '2024-01-15T10:30:00Z'
+            },
+            updatedAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Last update date',
+              example: '2024-01-15T10:30:00Z'
+            },
+            job: {
+              $ref: '#/components/schemas/Job'
+            },
+            applicant: {
+              $ref: '#/components/schemas/User'
+            }
+          }
+        },
+
+        // Pagination info schema
+        PaginationInfo: {
+          type: 'object',
+          properties: {
+            currentPage: {
+              type: 'integer',
+              description: 'Current page number',
+              example: 1
+            },
+            totalPages: {
+              type: 'integer',
+              description: 'Total number of pages',
+              example: 5
+            },
+            totalItems: {
+              type: 'integer',
+              description: 'Total number of items',
+              example: 48
+            },
+            hasNextPage: {
+              type: 'boolean',
+              description: 'Whether there is a next page',
+              example: true
+            },
+            hasPrevPage: {
+              type: 'boolean',
+              description: 'Whether there is a previous page',
+              example: false
+            }
+          }
         }
       }
     },
@@ -853,6 +939,10 @@ const options = {
       {
         name: 'Jobs',
         description: 'Job posting and management endpoints'
+      },
+      {
+        name: 'Applications',
+        description: 'Job application management endpoints'
       }
     ]
   },
