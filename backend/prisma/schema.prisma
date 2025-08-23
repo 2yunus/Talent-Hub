@@ -37,6 +37,8 @@ model User {
   website      String?
   github       String?
   linkedin     String?
+  phone        String?
+  isProfilePublic Boolean @default(true)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -62,7 +64,7 @@ model Company {
   website     String?
   location    String?
   industry    String?
-  size        CompanySize?
+  size        String? // Changed from CompanySize enum to String to match controller expectations
   founded     Int?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -138,13 +140,7 @@ enum UserRole {
   ADMIN
 }
 
-enum CompanySize {
-  STARTUP
-  SMALL
-  MEDIUM
-  LARGE
-  ENTERPRISE
-}
+
 
 enum JobType {
   FULL_TIME

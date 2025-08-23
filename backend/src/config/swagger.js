@@ -928,6 +928,311 @@ const options = {
               example: false
             }
           }
+        },
+
+        // User profile schema (complete profile)
+        UserProfile: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              description: 'Unique user identifier',
+              example: 'clx1234567890abcdef'
+            },
+            email: {
+              type: 'string',
+              format: 'email',
+              description: 'User email address',
+              example: 'john.doe@example.com'
+            },
+            firstName: {
+              type: 'string',
+              description: 'User first name',
+              example: 'John'
+            },
+            lastName: {
+              type: 'string',
+              description: 'User last name',
+              example: 'Doe'
+            },
+            role: {
+              type: 'string',
+              enum: ['DEVELOPER', 'EMPLOYER'],
+              description: 'User role',
+              example: 'DEVELOPER'
+            },
+            bio: {
+              type: 'string',
+              description: 'User biography',
+              example: 'Full-stack developer with 5+ years of experience'
+            },
+            location: {
+              type: 'string',
+              description: 'User location',
+              example: 'San Francisco, CA'
+            },
+            skills: {
+              type: 'array',
+              items: {
+                type: 'string'
+              },
+              description: 'User skills',
+              example: ['JavaScript', 'React', 'Node.js', 'Python']
+            },
+            experience: {
+              type: 'string',
+              description: 'User work experience',
+              example: '5 years in web development'
+            },
+            education: {
+              type: 'string',
+              description: 'User education background',
+              example: 'BS Computer Science, Stanford University'
+            },
+            website: {
+              type: 'string',
+              format: 'uri',
+              description: 'Personal website URL',
+              example: 'https://johndoe.dev'
+            },
+            github: {
+              type: 'string',
+              format: 'uri',
+              description: 'GitHub profile URL',
+              example: 'https://github.com/johndoe'
+            },
+            linkedin: {
+              type: 'string',
+              format: 'uri',
+              description: 'LinkedIn profile URL',
+              example: 'https://linkedin.com/in/johndoe'
+            },
+            avatar: {
+              type: 'string',
+              format: 'uri',
+              description: 'Avatar image URL',
+              example: 'https://example.com/avatar.jpg'
+            },
+            phone: {
+              type: 'string',
+              description: 'Phone number',
+              example: '+1-555-123-4567'
+            },
+            isProfilePublic: {
+              type: 'boolean',
+              description: 'Whether the profile is publicly visible',
+              example: true
+            },
+            createdAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Account creation date',
+              example: '2024-01-15T10:30:00Z'
+            },
+            updatedAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Last profile update date',
+              example: '2024-01-15T10:30:00Z'
+            },
+            company: {
+              $ref: '#/components/schemas/Company'
+            }
+          }
+        },
+
+        // Public user profile schema
+        UserPublic: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              description: 'Unique user identifier',
+              example: 'clx1234567890abcdef'
+            },
+            firstName: {
+              type: 'string',
+              description: 'User first name',
+              example: 'John'
+            },
+            lastName: {
+              type: 'string',
+              description: 'User last name',
+              example: 'Doe'
+            },
+            role: {
+              type: 'string',
+              enum: ['DEVELOPER', 'EMPLOYER'],
+              description: 'User role',
+              example: 'DEVELOPER'
+            },
+            bio: {
+              type: 'string',
+              description: 'User biography',
+              example: 'Full-stack developer with 5+ years of experience'
+            },
+            location: {
+              type: 'string',
+              description: 'User location',
+              example: 'San Francisco, CA'
+            },
+            skills: {
+              type: 'array',
+              items: {
+                type: 'string'
+              },
+              description: 'User skills',
+              example: ['JavaScript', 'React', 'Node.js']
+            },
+            experience: {
+              type: 'string',
+              description: 'User work experience',
+              example: '5 years in web development'
+            },
+            education: {
+              type: 'string',
+              description: 'User education background',
+              example: 'BS Computer Science, Stanford University'
+            },
+            website: {
+              type: 'string',
+              format: 'uri',
+              description: 'Personal website URL',
+              example: 'https://johndoe.dev'
+            },
+            github: {
+              type: 'string',
+              format: 'uri',
+              description: 'GitHub profile URL',
+              example: 'https://github.com/johndoe'
+            },
+            linkedin: {
+              type: 'string',
+              format: 'uri',
+              description: 'LinkedIn profile URL',
+              example: 'https://linkedin.com/in/johndoe'
+            },
+            avatar: {
+              type: 'string',
+              format: 'uri',
+              description: 'Avatar image URL',
+              example: 'https://example.com/avatar.jpg'
+            },
+            createdAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Account creation date',
+              example: '2024-01-15T10:30:00Z'
+            },
+            company: {
+              type: 'object',
+              properties: {
+                id: {
+                  type: 'string',
+                  example: 'clx1234567890abcdef'
+                },
+                name: {
+                  type: 'string',
+                  example: 'Tech Innovations Inc.'
+                },
+                logo: {
+                  type: 'string',
+                  format: 'uri',
+                  example: 'https://example.com/logo.png'
+                }
+              }
+            }
+          }
+        },
+
+        // Company schema
+        Company: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              description: 'Unique company identifier',
+              example: 'clx1234567890abcdef'
+            },
+            name: {
+              type: 'string',
+              description: 'Company name',
+              example: 'Tech Innovations Inc.'
+            },
+            description: {
+              type: 'string',
+              description: 'Company description',
+              example: 'We are a cutting-edge technology company...'
+            },
+            website: {
+              type: 'string',
+              format: 'uri',
+              description: 'Company website URL',
+              example: 'https://techinnovations.com'
+            },
+            size: {
+              type: 'string',
+              enum: ['1-10', '11-50', '51-200', '201-500', '501-1000', '1000+'],
+              description: 'Company size',
+              example: '51-200'
+            },
+            industry: {
+              type: 'string',
+              description: 'Company industry',
+              example: 'Software Development'
+            },
+            location: {
+              type: 'string',
+              description: 'Company location',
+              example: 'San Francisco, CA'
+            },
+            logo: {
+              type: 'string',
+              format: 'uri',
+              description: 'Company logo URL',
+              example: 'https://example.com/logo.png'
+            },
+            createdAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Company creation date',
+              example: '2024-01-15T10:30:00Z'
+            },
+            updatedAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Last update date',
+              example: '2024-01-15T10:30:00Z'
+            }
+          }
+        },
+
+        // Uploaded file schema
+        UploadedFile: {
+          type: 'object',
+          properties: {
+            filename: {
+              type: 'string',
+              description: 'Generated filename',
+              example: 'user123_1640995200000_avatar.jpg'
+            },
+            originalName: {
+              type: 'string',
+              description: 'Original filename',
+              example: 'my-avatar.jpg'
+            },
+            size: {
+              type: 'integer',
+              description: 'File size in bytes',
+              example: 1048576
+            },
+            url: {
+              type: 'string',
+              format: 'uri',
+              description: 'File access URL',
+              example: 'http://localhost:5000/uploads/avatars/user123_1640995200000_avatar.jpg'
+            }
+          }
         }
       }
     },
@@ -943,6 +1248,14 @@ const options = {
       {
         name: 'Applications',
         description: 'Job application management endpoints'
+      },
+      {
+        name: 'Users',
+        description: 'User profile and company management endpoints'
+      },
+      {
+        name: 'Uploads',
+        description: 'File upload and management endpoints'
       }
     ]
   },

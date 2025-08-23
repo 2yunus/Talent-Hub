@@ -78,18 +78,21 @@ app.get('/api-docs.json', (req, res) => {
 const authRoutes = require('./routes/auth');
 const jobRoutes = require('./routes/jobs');
 const applicationRoutes = require('./routes/applications');
+const userRoutes = require('./routes/users');
+const uploadRoutes = require('./routes/uploads');
 
 // Make Prisma client available to middleware
 app.locals.prisma = new (require('@prisma/client')).PrismaClient();
+
+// Serve static files from uploads directory
+app.use('/uploads', express.static('uploads'));
 
 // API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/jobs', jobRoutes);
 app.use('/api/applications', applicationRoutes);
-
-app.use('/api/users', (req, res) => {
-  res.json({ message: 'Users routes coming soon!' });
-});
+app.use('/api/users', userRoutes);
+app.use('/api/uploads', uploadRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {
