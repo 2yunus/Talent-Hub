@@ -91,7 +91,7 @@ export default function ProfilePage() {
           }`}>
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
               <div className="text-center">
-                <div className="w-32 h-32 bg-gradient-to-br from-primary-600 to-secondary-500 rounded-full flex items-center justify-center text-white font-bold text-4xl mx-auto mb-6">
+                <div className="w-24 h-24 bg-gradient-to-br from-primary-600 to-secondary-500 rounded-full flex items-center justify-center text-white font-bold text-3xl mx-auto mb-6">
                   {user?.firstName?.[0]}{user?.lastName?.[0]}
                 </div>
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">

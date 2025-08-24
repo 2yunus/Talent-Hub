@@ -20,9 +20,9 @@ export default function NotFound() {
       <div className="text-center max-w-md">
         {/* 404 Icon */}
         <div className={`mb-8 transition-all duration-700 ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}>
-          <div className="w-32 h-32 bg-gradient-to-br from-primary-600 to-secondary-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
-            <ExclamationTriangleIcon className="w-16 h-16 text-white" />
-          </div>
+                  <div className="w-24 h-24 bg-gradient-to-br from-primary-600 to-secondary-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
+          <ExclamationTriangleIcon className="w-12 h-12 text-white" />
+        </div>
         </div>
 
         {/* Content */}

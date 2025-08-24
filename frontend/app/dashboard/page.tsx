@@ -238,7 +238,7 @@ export default function DashboardPage() {
             </div>
             <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
               <div className="text-center">
-                <ChartBarIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <ChartBarIcon className="w-12 h-12 text-gray-300 mx-auto mb-4" />
                 <p className="text-gray-500">Activity chart will be displayed here</p>
               </div>
             </div>

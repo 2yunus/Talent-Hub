@@ -69,8 +69,8 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         {/* Header */}
         <div className={`text-center mb-8 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-          <div className="w-20 h-20 bg-gradient-to-br from-primary-600 to-secondary-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl">
-            <SparklesIcon className="w-10 h-10 text-white" />
+          <div className="w-16 h-16 bg-gradient-to-br from-primary-600 to-secondary-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl">
+            <SparklesIcon className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
           <p className="text-gray-600">Sign in to your TalentHub account</p>
