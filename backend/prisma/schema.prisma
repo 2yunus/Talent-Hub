@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,124 +8,103 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  password     String
-  firstName    String
-  lastName     String
-  role         UserRole @default(DEVELOPER)
-  bio          String?
-  
-  // File Uploads
-  avatar       String?
-  avatarFileName String?
-  avatarFileSize Int?
-  
-  // Resume (for developers)
-  resume       String?
-  resumeFileName String?
-  resumeFileSize Int?
-  resumeFileType String?
-  
-  location     String?
-  skills       String[]
-  experience   String?
-  education    String?
-  website      String?
-  github       String?
-  linkedin     String?
-  phone        String?
-  isProfilePublic Boolean @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  // Relations
-  jobsPosted     Job[]          @relation("JobPoster")
-  applications   Application[]
-  company        Company?       @relation("CompanyOwner")
+  id              String        @id @default(cuid())
+  email           String        @unique
+  password        String
+  firstName       String
+  lastName        String
+  role            UserRole      @default(DEVELOPER)
+  bio             String?
+  avatar          String?
+  avatarFileName  String?
+  avatarFileSize  Int?
+  resume          String?
+  resumeFileName  String?
+  resumeFileSize  Int?
+  resumeFileType  String?
+  location        String?
+  skills          String[]
+  experience      String?
+  education       String?
+  website         String?
+  github          String?
+  linkedin        String?
+  phone           String?
+  isProfilePublic Boolean       @default(true)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  applications    Application[]
+  company         Company?      @relation("CompanyOwner")
+  jobsPosted      Job[]         @relation("JobPoster")
 
   @@map("users")
 }
 
 model Company {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  
-  // File Uploads
-  logo        String?
+  id           String   @id @default(cuid())
+  name         String
+  description  String?
+  logo         String?
   logoFileName String?
   logoFileSize Int?
   logoFileType String?
-  
-  website     String?
-  location    String?
-  industry    String?
-  size        String? // Changed from CompanySize enum to String to match controller expectations
-  founded     Int?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // Relations
-  owner       User     @relation("CompanyOwner", fields: [ownerId], references: [id])
-  ownerId     String   @unique
-  jobs        Job[]    @relation("CompanyJobs")
+  website      String?
+  location     String?
+  industry     String?
+  size         String?
+  founded      Int?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  ownerId      String   @unique
+  owner        User     @relation("CompanyOwner", fields: [ownerId], references: [id])
+  jobs         Job[]    @relation("CompanyJobs")
 
   @@map("companies")
 }
 
 model Job {
-  id          String   @id @default(cuid())
-  title       String
-  description String
-  requirements String[]
+  id               String          @id @default(cuid())
+  title            String
+  description      String
+  requirements     String[]
   responsibilities String[]
-  salary      Json? // Store as JSON object with min, max, currency
-  location    String
-  type        JobType
-  experience  ExperienceLevel
-  skills      String[]
-  benefits    String[]
-  companyName String
-  companyLogo String?
-  isRemote    Boolean  @default(false)
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // Relations
-  postedBy    User          @relation("JobPoster", fields: [postedById], references: [id])
-  postedById  String
-  company     Company?      @relation("CompanyJobs", fields: [companyId], references: [id])
-  companyId   String?
-  applications Application[]
+  salary           Json?
+  location         String
+  type             JobType
+  experience       ExperienceLevel
+  skills           String[]
+  benefits         String[]
+  companyName      String
+  companyLogo      String?
+  isRemote         Boolean         @default(false)
+  isActive         Boolean         @default(true)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  postedById       String
+  companyId        String?
+  applications     Application[]
+  company          Company?        @relation("CompanyJobs", fields: [companyId], references: [id])
+  postedBy         User            @relation("JobPoster", fields: [postedById], references: [id])
 
   @@map("jobs")
 }
 
 model Application {
-  id        String           @id @default(cuid())
-  status    ApplicationStatus @default(PENDING)
-  coverLetter String?
-  
-  // File Uploads
-  resume    String?
-  resumeFileName String?
-  resumeFileSize Int?
-  resumeFileType String?
-  
-  // Additional Files
-  portfolio String?
+  id              String            @id @default(cuid())
+  status          ApplicationStatus @default(PENDING)
+  coverLetter     String?
+  resume          String?
+  resumeFileName  String?
+  resumeFileSize  Int?
+  resumeFileType  String?
+  portfolio       String?
   coverLetterFile String?
-  
-  appliedAt DateTime         @default(now())
-  updatedAt DateTime         @updatedAt
-
-  // Relations
-  job       Job              @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  jobId     String
-  applicant User             @relation(fields: [applicantId], references: [id], onDelete: Cascade)
-  applicantId String
+  appliedAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  jobId           String
+  applicantId     String
+  applicant       User              @relation(fields: [applicantId], references: [id], onDelete: Cascade)
+  job             Job               @relation(fields: [jobId], references: [id], onDelete: Cascade)
 
   @@unique([jobId, applicantId])
   @@map("applications")
@@ -139,8 +115,6 @@ enum UserRole {
   EMPLOYER
   ADMIN
 }
-
-
 
 enum JobType {
   FULL_TIME
@@ -167,5 +141,3 @@ enum ApplicationStatus {
   REJECTED
   WITHDRAWN
 }
-
-

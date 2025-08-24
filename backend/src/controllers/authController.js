@@ -1,9 +1,9 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { PrismaClient } = require('@prisma/client');
 const Joi = require('joi');
 
-const prisma = new PrismaClient();
+// Get Prisma client from request object (set by server.js)
+const getPrisma = (req) => req.prisma;
 
 // Validation schemas
 const registerSchema = Joi.object({
@@ -42,6 +42,7 @@ const register = async (req, res) => {
     const { email, password, firstName, lastName, role, ...otherFields } = value;
 
     // Check if user already exists
+    const prisma = getPrisma(req);
     const existingUser = await prisma.user.findUnique({
       where: { email }
     });
@@ -127,6 +128,7 @@ const login = async (req, res) => {
     const { email, password } = value;
 
     // Find user by email
+    const prisma = getPrisma(req);
     const user = await prisma.user.findUnique({
       where: { email }
     });
@@ -196,6 +198,7 @@ const getProfile = async (req, res) => {
   try {
     const userId = req.user.userId;
 
+    const prisma = getPrisma(req);
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: {
@@ -250,6 +253,7 @@ const updateProfile = async (req, res) => {
     delete updateData.createdAt;
     delete updateData.updatedAt;
 
+    const prisma = getPrisma(req);
     const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: updateData,

@@ -74,6 +74,9 @@ app.get('/api-docs.json', (req, res) => {
   res.send(swaggerSpecs);
 });
 
+// Import middleware
+const { injectPrisma } = require('./middleware/prisma');
+
 // Import routes
 const authRoutes = require('./routes/auth');
 const jobRoutes = require('./routes/jobs');
@@ -82,17 +85,32 @@ const userRoutes = require('./routes/users');
 const uploadRoutes = require('./routes/uploads');
 
 // Make Prisma client available to middleware
-app.locals.prisma = new (require('@prisma/client')).PrismaClient();
+let PrismaClient;
+try {
+  // Try to use the generated client from root node_modules first
+  PrismaClient = require('@prisma/client').PrismaClient;
+} catch (error) {
+  console.error('Failed to load Prisma client from @prisma/client:', error);
+  // Fallback to the root prisma client
+  try {
+    PrismaClient = require('../../node_modules/.prisma/client').PrismaClient;
+  } catch (fallbackError) {
+    console.error('Failed to load Prisma client from fallback location:', fallbackError);
+    throw new Error('Prisma client could not be loaded');
+  }
+}
+
+app.locals.prisma = new PrismaClient();
 
 // Serve static files from uploads directory
 app.use('/uploads', express.static('uploads'));
 
-// API routes
-app.use('/api/auth', authRoutes);
-app.use('/api/jobs', jobRoutes);
-app.use('/api/applications', applicationRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/uploads', uploadRoutes);
+// API routes with Prisma injection
+app.use('/api/auth', injectPrisma, authRoutes);
+app.use('/api/jobs', injectPrisma, jobRoutes);
+app.use('/api/applications', injectPrisma, applicationRoutes);
+app.use('/api/users', injectPrisma, userRoutes);
+app.use('/api/uploads', injectPrisma, uploadRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {

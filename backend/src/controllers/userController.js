@@ -1,8 +1,8 @@
-const { PrismaClient } = require('@prisma/client');
 const Joi = require('joi');
 const bcrypt = require('bcryptjs');
 
-const prisma = new PrismaClient();
+// Get Prisma client from request object (set by server.js)
+const getPrisma = (req) => req.prisma;
 
 // Validation schemas
 const updateProfileSchema = Joi.object({
@@ -54,6 +54,7 @@ const getProfile = async (req, res) => {
   try {
     const userId = req.user.userId;
 
+    const prisma = getPrisma(req);
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: {
@@ -122,6 +123,7 @@ const updateProfile = async (req, res) => {
 
     const userId = req.user.userId;
 
+    const prisma = getPrisma(req);
     const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: value,
@@ -179,6 +181,7 @@ const updateCompanyProfile = async (req, res) => {
 
     const userId = req.user.userId;
 
+    const prisma = getPrisma(req);
     // Check if user has a company profile
     const existingCompany = await prisma.company.findUnique({
       where: { ownerId: userId }
@@ -233,6 +236,7 @@ const getUserById = async (req, res) => {
   try {
     const { id } = req.params;
 
+    const prisma = getPrisma(req);
     const user = await prisma.user.findUnique({
       where: { id },
       select: {
@@ -343,6 +347,7 @@ const searchUsers = async (req, res) => {
       };
     }
 
+    const prisma = getPrisma(req);
     // Calculate pagination
     const skip = (page - 1) * limit;
     const totalUsers = await prisma.user.count({ where });
@@ -407,6 +412,7 @@ const changePassword = async (req, res) => {
     const { currentPassword, newPassword } = value;
     const userId = req.user.userId;
 
+    const prisma = getPrisma(req);
     // Get user with password
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -454,6 +460,7 @@ const deleteAccount = async (req, res) => {
   try {
     const userId = req.user.userId;
 
+    const prisma = getPrisma(req);
     // Delete user and related data (cascading delete)
     await prisma.user.delete({
       where: { id: userId }
@@ -478,6 +485,7 @@ const getUserStats = async (req, res) => {
 
     let stats = {};
 
+    const prisma = getPrisma(req);
     if (req.user.role === 'DEVELOPER') {
       // Developer stats
       const applicationStats = await prisma.application.groupBy({

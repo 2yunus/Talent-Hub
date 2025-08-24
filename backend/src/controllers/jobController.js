@@ -1,7 +1,7 @@
-const { PrismaClient } = require('@prisma/client');
 const Joi = require('joi');
 
-const prisma = new PrismaClient();
+// Get Prisma client from request object (set by server.js)
+const getPrisma = (req) => req.prisma;
 
 // Validation schemas
 const createJobSchema = Joi.object({
@@ -76,6 +76,7 @@ const createJob = async (req, res) => {
     const jobData = { ...value, postedById: userId };
 
     // Create job
+    const prisma = getPrisma(req);
     const job = await prisma.job.create({
       data: jobData,
       include: {
@@ -171,6 +172,7 @@ const getAllJobs = async (req, res) => {
     // TODO: Implement salary filtering at the application level if needed
 
     // Calculate pagination
+    const prisma = getPrisma(req);
     const skip = (page - 1) * limit;
     const totalJobs = await prisma.job.count({ where });
     const totalPages = Math.ceil(totalJobs / limit);
@@ -216,6 +218,7 @@ const getJobById = async (req, res) => {
   try {
     const { id } = req.params;
 
+    const prisma = getPrisma(req);
     const job = await prisma.job.findUnique({
       where: { id },
       include: {
@@ -289,6 +292,7 @@ const updateJob = async (req, res) => {
     }
 
     // Check if job exists and user owns it
+    const prisma = getPrisma(req);
     const existingJob = await prisma.job.findUnique({
       where: { id }
     });
@@ -349,6 +353,7 @@ const deleteJob = async (req, res) => {
     const userId = req.user.userId;
 
     // Check if job exists and user owns it
+    const prisma = getPrisma(req);
     const existingJob = await prisma.job.findUnique({
       where: { id }
     });
@@ -389,6 +394,7 @@ const getMyJobs = async (req, res) => {
     const userId = req.user.userId;
     const { page = 1, limit = 10 } = req.query;
 
+    const prisma = getPrisma(req);
     const skip = (page - 1) * limit;
     const totalJobs = await prisma.job.count({
       where: { postedById: userId }
@@ -445,6 +451,7 @@ const toggleJobStatus = async (req, res) => {
     const userId = req.user.userId;
 
     // Check if job exists and user owns it
+    const prisma = getPrisma(req);
     const existingJob = await prisma.job.findUnique({
       where: { id }
     });

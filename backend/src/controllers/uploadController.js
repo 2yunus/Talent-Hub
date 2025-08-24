@@ -1,9 +1,9 @@
-const { PrismaClient } = require('@prisma/client');
 const path = require('path');
 const fs = require('fs');
 const { deleteFile, getFileUrl, validateFileSize, validateFileType } = require('../config/upload');
 
-const prisma = new PrismaClient();
+// Get Prisma client from request object (set by server.js)
+const getPrisma = (req) => req.prisma;
 
 // Upload avatar
 const uploadAvatar = async (req, res) => {
@@ -17,6 +17,7 @@ const uploadAvatar = async (req, res) => {
 
     const userId = req.user.userId;
     const file = req.file;
+    const prisma = getPrisma(req);
 
     // Validate file type and size
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
@@ -128,6 +129,7 @@ const uploadLogo = async (req, res) => {
       });
     }
 
+    const prisma = getPrisma(req);
     // Get or create company
     let company = await prisma.company.findUnique({
       where: { ownerId: userId }
@@ -301,6 +303,7 @@ const deleteUploadedFile = async (req, res) => {
     // Delete the file
     await deleteFile(filePath);
 
+    const prisma = getPrisma(req);
     // Update database if it's an avatar or logo
     if (type === 'avatars') {
       await prisma.user.update({

@@ -1,7 +1,7 @@
-const { PrismaClient } = require('@prisma/client');
 const Joi = require('joi');
 
-const prisma = new PrismaClient();
+// Get Prisma client from request object (set by server.js)
+const getPrisma = (req) => req.prisma;
 
 // Validation schemas
 const createApplicationSchema = Joi.object({
@@ -32,6 +32,7 @@ const applyForJob = async (req, res) => {
 
     const { jobId, coverLetter, resume, portfolio } = value;
     const userId = req.user.userId;
+    const prisma = getPrisma(req);
 
     // Check if user is a developer
     if (req.user.role !== 'DEVELOPER') {
@@ -131,6 +132,7 @@ const getJobApplications = async (req, res) => {
       });
     }
 
+    const prisma = getPrisma(req);
     // Check if job exists and user owns it
     const job = await prisma.job.findUnique({
       where: { id: jobId }
@@ -221,6 +223,7 @@ const getMyApplications = async (req, res) => {
       where.status = status;
     }
 
+    const prisma = getPrisma(req);
     // Calculate pagination
     const skip = (page - 1) * limit;
     const totalApplications = await prisma.application.count({ where });
@@ -296,6 +299,7 @@ const updateApplicationStatus = async (req, res) => {
       });
     }
 
+    const prisma = getPrisma(req);
     // Check if application exists
     const application = await prisma.application.findUnique({
       where: { id },
@@ -373,6 +377,7 @@ const withdrawApplication = async (req, res) => {
       });
     }
 
+    const prisma = getPrisma(req);
     // Check if application exists and user owns it
     const application = await prisma.application.findUnique({
       where: { id }
@@ -433,6 +438,7 @@ const getApplicationById = async (req, res) => {
     const { id } = req.params;
     const userId = req.user.userId;
 
+    const prisma = getPrisma(req);
     // Check if application exists
     const application = await prisma.application.findUnique({
       where: { id },
