@@ -1,6 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { useAuth } from '../../contexts/AuthContext'
+import { useRole } from '../../hooks/useRole'
 import { 
   MagnifyingGlassIcon, 
   FunnelIcon, 
@@ -10,7 +13,8 @@ import {
   ClockIcon,
   StarIcon,
   BookmarkIcon,
-  EyeIcon
+  EyeIcon,
+  PlusIcon
 } from '@heroicons/react/24/outline'
 
 interface Job {
@@ -36,6 +40,8 @@ interface Job {
 }
 
 export default function JobsPage() {
+  const { user } = useAuth()
+  const { isDeveloper, isEmployer } = useRole()
   const [jobs, setJobs] = useState<Job[]>([])
   const [filteredJobs, setFilteredJobs] = useState<Job[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -229,10 +235,27 @@ export default function JobsPage() {
   return (
     <div className="min-h-screen bg-white p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
+        {/* Header - Different for Developers vs Employers */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Find Your Dream Job</h1>
-          <p className="text-xl text-gray-600">Discover thousands of opportunities from top companies</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-bold text-gray-900 mb-2">
+                {isDeveloper ? 'Find Your Dream Job' : 'Manage Job Postings'}
+              </h1>
+              <p className="text-xl text-gray-600">
+                {isDeveloper 
+                  ? 'Discover thousands of opportunities from top companies'
+                  : 'Review and manage your company\'s job postings'
+                }
+              </p>
+            </div>
+            {isEmployer && (
+              <Link href="/post-job" className="btn-primary">
+                <PlusIcon className="w-5 h-5 mr-2" />
+                Post New Job
+              </Link>
+            )}
+          </div>
         </div>
 
         {/* Search and Filters */}
@@ -413,10 +436,19 @@ export default function JobsPage() {
                       </div>
 
                       <div className="flex space-x-2">
-                        <button className="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200">
-                          <BookmarkIcon className="w-5 h-5" />
-                        </button>
-                        <button className="btn-primary">Apply Now</button>
+                        {isDeveloper ? (
+                          <>
+                            <button className="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200">
+                              <BookmarkIcon className="w-5 h-5" />
+                            </button>
+                            <button className="btn-primary">Apply Now</button>
+                          </>
+                        ) : (
+                          <>
+                            <button className="btn-outline">Edit</button>
+                            <button className="btn-primary">View Applications</button>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>

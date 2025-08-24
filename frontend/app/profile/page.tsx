@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
+import { useRole } from '../../hooks/useRole'
 import { 
   UserIcon,
   EnvelopeIcon,
@@ -10,11 +11,13 @@ import {
   GlobeAltIcon,
   PencilIcon,
   CheckIcon,
-  XMarkIcon
+  XMarkIcon,
+  BuildingOfficeIcon
 } from '@heroicons/react/24/outline'
 
 export default function ProfilePage() {
   const { user } = useAuth()
+  const { isDeveloper, isEmployer } = useRole()
   const [isVisible, setIsVisible] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [profileData, setProfileData] = useState({
@@ -58,12 +61,19 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-white p-6">
       <div className="max-w-4xl mx-auto">
-        {/* Header */}
+        {/* Header - Different for Developers vs Employers */}
         <div className={`mb-8 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">Profile</h1>
-              <p className="text-xl text-gray-600">Manage your personal information and preferences</p>
+              <h1 className="text-4xl font-bold text-gray-900 mb-2">
+                {isDeveloper ? 'Developer Profile' : 'Company Profile'}
+              </h1>
+              <p className="text-xl text-gray-600">
+                {isDeveloper 
+                  ? 'Manage your personal information and professional details'
+                  : 'Manage your company information and hiring preferences'
+                }
+              </p>
             </div>
             <button
               onClick={() => setIsEditing(!isEditing)}

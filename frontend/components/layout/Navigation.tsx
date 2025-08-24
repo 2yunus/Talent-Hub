@@ -9,9 +9,7 @@ import {
   Bars3Icon, 
   XMarkIcon,
   MagnifyingGlassIcon,
-  BriefcaseIcon,
-  UserGroupIcon,
-  DocumentTextIcon
+  BriefcaseIcon
 } from '@heroicons/react/24/outline'
 
 export default function Navigation() {
@@ -56,14 +54,6 @@ export default function Navigation() {
               <BriefcaseIcon className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform duration-200" />
               Jobs
             </Link>
-            <Link href="/developers" className="nav-link group">
-              <UserGroupIcon className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform duration-200" />
-              Developers
-            </Link>
-            <Link href="/companies" className="nav-link group">
-              <DocumentTextIcon className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform duration-200" />
-              Companies
-            </Link>
           </div>
 
           {/* Search Bar */}
@@ -72,7 +62,7 @@ export default function Navigation() {
               <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search jobs, developers, companies..."
+                placeholder="Search jobs..."
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 hover:border-gray-400"
               />
             </div>
@@ -156,26 +146,8 @@ export default function Navigation() {
                   Jobs
                 </div>
               </Link>
-              <Link 
-                href="/developers" 
-                className="block px-4 py-3 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <div className="flex items-center">
-                  <UserGroupIcon className="w-5 h-5 mr-3" />
-                  Developers
-                </div>
-              </Link>
-              <Link 
-                href="/companies" 
-                className="block px-4 py-3 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <div className="flex items-center">
-                  <DocumentTextIcon className="w-5 h-5 mr-3" />
-                  Companies
-                </div>
-              </Link>
+
+
             </div>
 
             {/* Mobile Auth Buttons */}

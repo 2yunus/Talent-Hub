@@ -13,10 +13,28 @@ import {
   XMarkIcon
 } from '@heroicons/react/24/outline'
 
+interface JobFormData {
+  title: string
+  company: string
+  location: string
+  type: 'FULL_TIME' | 'PART_TIME' | 'CONTRACT' | 'INTERNSHIP' | 'FREELANCE'
+  experience: 'ENTRY' | 'JUNIOR' | 'MID' | 'SENIOR' | 'LEAD' | 'MANAGER'
+  salary: {
+    min: string
+    max: string
+    currency: string
+  }
+  description: string
+  requirements: string[]
+  benefits: string[]
+  skills: string[]
+  applicationDeadline: string
+}
+
 export default function PostJobPage() {
   const { user } = useAuth()
   const [isVisible, setIsVisible] = useState(false)
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<JobFormData>({
     title: '',
     company: user?.companyName || '',
     location: '',
@@ -38,8 +56,15 @@ export default function PostJobPage() {
     setIsVisible(true)
   }, [])
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = (field: keyof JobFormData, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }))
+  }
+
+  const handleSalaryChange = (field: 'min' | 'max' | 'currency', value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      salary: { ...prev.salary, [field]: value }
+    }))
   }
 
   const handleArrayChange = (field: keyof typeof formData, index: number, value: string) => {
@@ -205,7 +230,7 @@ export default function PostJobPage() {
                   <input
                     type="number"
                     value={formData.salary.min}
-                    onChange={(e) => handleInputChange('salary', { ...formData.salary, min: e.target.value })}
+                    onChange={(e) => handleSalaryChange('min', e.target.value)}
                     className="input"
                     placeholder="50000"
                   />
@@ -216,7 +241,7 @@ export default function PostJobPage() {
                   <input
                     type="number"
                     value={formData.salary.max}
-                    onChange={(e) => handleInputChange('salary', { ...formData.salary, max: e.target.value })}
+                    onChange={(e) => handleSalaryChange('max', e.target.value)}
                     className="input"
                     placeholder="80000"
                   />
@@ -226,7 +251,7 @@ export default function PostJobPage() {
                   <label className="form-label">Currency</label>
                   <select
                     value={formData.salary.currency}
-                    onChange={(e) => handleInputChange('salary', { ...formData.salary, currency: e.target.value })}
+                    onChange={(e) => handleSalaryChange('currency', e.target.value)}
                     className="input"
                   >
                     {currencies.map(currency => (

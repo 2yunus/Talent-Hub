@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
+import { useRole } from '../../hooks/useRole'
 import { 
   DocumentTextIcon,
   EyeIcon,
@@ -14,10 +15,26 @@ import {
   CalendarIcon
 } from '@heroicons/react/24/outline'
 
+interface Application {
+  id: string
+  jobTitle: string
+  company: string
+  applicant: string
+  applicantEmail: string
+  status: 'PENDING' | 'REVIEWING' | 'ACCEPTED' | 'REJECTED'
+  appliedDate: string
+  location: string
+  experience: string
+  skills: string[]
+  coverLetter: string
+  resume: string
+}
+
 export default function ApplicationsPage() {
   const { user } = useAuth()
+  const { isDeveloper, isEmployer } = useRole()
   const [isVisible, setIsVisible] = useState(false)
-  const [applications, setApplications] = useState<any[]>([])
+  const [applications, setApplications] = useState<Application[]>([])
   const [filter, setFilter] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -26,7 +43,7 @@ export default function ApplicationsPage() {
     // Mock data - replace with actual API call
     setApplications([
       {
-        id: 1,
+        id: '1',
         jobTitle: 'Senior React Developer',
         company: 'TechCorp',
         applicant: 'John Doe',
@@ -40,7 +57,7 @@ export default function ApplicationsPage() {
         resume: 'resume.pdf'
       },
       {
-        id: 2,
+        id: '2',
         jobTitle: 'Full Stack Developer',
         company: 'StartupXYZ',
         applicant: 'Jane Smith',
@@ -54,7 +71,7 @@ export default function ApplicationsPage() {
         resume: 'jane_resume.pdf'
       },
       {
-        id: 3,
+        id: '3',
         jobTitle: 'Frontend Engineer',
         company: 'BigTech Inc',
         applicant: 'Mike Johnson',
@@ -68,7 +85,7 @@ export default function ApplicationsPage() {
         resume: 'mike_resume.pdf'
       },
       {
-        id: 4,
+        id: '4',
         jobTitle: 'Backend Developer',
         company: 'DataFlow Systems',
         applicant: 'Sarah Wilson',
@@ -122,7 +139,7 @@ export default function ApplicationsPage() {
     return matchesFilter && matchesSearch
   })
 
-  const updateApplicationStatus = (id: number, newStatus: string) => {
+  const updateApplicationStatus = (id: string, newStatus: 'PENDING' | 'REVIEWING' | 'ACCEPTED' | 'REJECTED') => {
     setApplications(prev => 
       prev.map(app => 
         app.id === id ? { ...app, status: newStatus } : app
@@ -133,19 +150,28 @@ export default function ApplicationsPage() {
   return (
     <div className="min-h-screen bg-white p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className={`mb-8 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">Job Applications</h1>
-              <p className="text-xl text-gray-600">Review and manage applications for your job postings</p>
-            </div>
-            <div className="text-right">
-              <div className="text-2xl font-bold text-primary-600">{applications.length}</div>
-              <div className="text-sm text-gray-500">Total Applications</div>
-            </div>
-          </div>
-        </div>
+                 {/* Header - Different for Developers vs Employers */}
+         <div className={`mb-8 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+           <div className="flex items-center justify-between">
+             <div>
+               <h1 className="text-4xl font-bold text-gray-900 mb-2">
+                 {isDeveloper ? 'My Applications' : 'Job Applications'}
+               </h1>
+               <p className="text-xl text-gray-600">
+                 {isDeveloper 
+                   ? 'Track your job applications and their status'
+                   : 'Review and manage applications for your job postings'
+                 }
+               </p>
+             </div>
+             <div className="text-right">
+               <div className="text-2xl font-bold text-primary-600">{applications.length}</div>
+               <div className="text-sm text-gray-500">
+                 {isDeveloper ? 'Total Applications' : 'Total Applications'}
+               </div>
+             </div>
+           </div>
+         </div>
 
         {/* Filters and Search */}
         <div className={`mb-6 transition-all duration-700 delay-200 ${
@@ -281,13 +307,59 @@ export default function ApplicationsPage() {
                     </div>
                   </div>
 
-                  {/* Status Actions */}
+                  {/* Status Actions - Different for Developers vs Employers */}
                   <div className="lg:w-48">
-                    <div className="space-y-3">
-                      <h5 className="font-medium text-gray-900">Update Status</h5>
-                      
-                      {application.status === 'PENDING' && (
-                        <>
+                    {isEmployer ? (
+                      // Employer can update application status
+                      <div className="space-y-3">
+                        <h5 className="font-medium text-gray-900">Update Status</h5>
+                        
+                        {application.status === 'PENDING' && (
+                          <>
+                            <button
+                              onClick={() => updateApplicationStatus(application.id, 'REVIEWING')}
+                              className="btn-outline w-full text-sm"
+                            >
+                              <EyeIcon className="w-4 h-4 mr-2" />
+                              Mark as Reviewing
+                            </button>
+                            <button
+                              onClick={() => updateApplicationStatus(application.id, 'ACCEPTED')}
+                              className="btn-primary w-full text-sm"
+                            >
+                              <CheckIcon className="w-4 h-4 mr-2" />
+                              Accept
+                            </button>
+                            <button
+                              onClick={() => updateApplicationStatus(application.id, 'REJECTED')}
+                              className="btn-outline w-full text-sm text-red-600 border-red-200 hover:bg-red-50"
+                            >
+                              <XMarkIcon className="w-4 h-4 mr-2" />
+                              Reject
+                            </button>
+                          </>
+                        )}
+
+                        {application.status === 'REVIEWING' && (
+                          <>
+                            <button
+                              onClick={() => updateApplicationStatus(application.id, 'ACCEPTED')}
+                              className="btn-primary w-full text-sm"
+                            >
+                              <CheckIcon className="w-4 h-4 mr-2" />
+                              Accept
+                            </button>
+                            <button
+                              onClick={() => updateApplicationStatus(application.id, 'REJECTED')}
+                              className="btn-outline w-full text-sm text-red-600 border-red-200 hover:bg-red-50"
+                            >
+                              <XMarkIcon className="w-4 h-4 mr-2" />
+                              Reject
+                            </button>
+                          </>
+                        )}
+
+                        {(application.status === 'ACCEPTED' || application.status === 'REJECTED') && (
                           <button
                             onClick={() => updateApplicationStatus(application.id, 'REVIEWING')}
                             className="btn-outline w-full text-sm"
@@ -295,52 +367,24 @@ export default function ApplicationsPage() {
                             <EyeIcon className="w-4 h-4 mr-2" />
                             Mark as Reviewing
                           </button>
-                          <button
-                            onClick={() => updateApplicationStatus(application.id, 'ACCEPTED')}
-                            className="btn-primary w-full text-sm"
-                          >
-                            <CheckIcon className="w-4 h-4 mr-2" />
-                            Accept
-                          </button>
-                          <button
-                            onClick={() => updateApplicationStatus(application.id, 'REJECTED')}
-                            className="btn-outline w-full text-sm text-red-600 border-red-200 hover:bg-red-50"
-                          >
-                            <XMarkIcon className="w-4 h-4 mr-2" />
-                            Reject
-                          </button>
-                        </>
-                      )}
-
-                      {application.status === 'REVIEWING' && (
-                        <>
-                          <button
-                            onClick={() => updateApplicationStatus(application.id, 'ACCEPTED')}
-                            className="btn-primary w-full text-sm"
-                          >
-                            <CheckIcon className="w-4 h-4 mr-2" />
-                            Accept
-                          </button>
-                          <button
-                            onClick={() => updateApplicationStatus(application.id, 'REJECTED')}
-                            className="btn-outline w-full text-sm text-red-600 border-red-200 hover:bg-red-50"
-                          >
-                            <XMarkIcon className="w-4 h-4 mr-2" />
-                            Reject
-                          </button>
-                        </>
-                      )}
-
-                      {(application.status === 'ACCEPTED' || application.status === 'REJECTED') && (
-                        <button
-                          onClick={() => updateApplicationStatus(application.id, 'REVIEWING')}
-                          className="btn-outline w-full text-sm"
-                        >
-                          <EyeIcon className="w-4 h-4 mr-2" />
-                          Mark as Reviewing
-                        </button>
-                      )}
-                    </div>
+                        )}
+                      </div>
+                    ) : (
+                      // Developer can see application status and actions
+                      <div className="space-y-3">
+                        <h5 className="font-medium text-gray-900">Application Status</h5>
+                        <div className={`badge ${getStatusColor(application.status)}`}>
+                          <span className="flex items-center space-x-1">
+                            {getStatusIcon(application.status)}
+                            <span>{application.status}</span>
+                          </span>
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          <p>Applied: {application.appliedDate}</p>
+                          <p>Location: {application.location}</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

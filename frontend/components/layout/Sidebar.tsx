@@ -7,13 +7,8 @@ import { useAuth } from '../../contexts/AuthContext'
 import { 
   HomeIcon,
   BriefcaseIcon,
-  UserGroupIcon,
-  DocumentTextIcon,
   UserIcon,
-  Cog6ToothIcon,
-  ChartBarIcon,
   EnvelopeIcon,
-  BookmarkIcon,
   ChevronLeftIcon,
   ChevronRightIcon
 } from '@heroicons/react/24/outline'
@@ -26,13 +21,8 @@ export default function Sidebar() {
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
     { name: 'Jobs', href: '/jobs', icon: BriefcaseIcon },
-    { name: 'Developers', href: '/developers', icon: UserGroupIcon },
-    { name: 'Companies', href: '/companies', icon: DocumentTextIcon },
     { name: 'Applications', href: '/applications', icon: EnvelopeIcon },
-    { name: 'Saved Jobs', href: '/saved-jobs', icon: BookmarkIcon },
-    { name: 'Analytics', href: '/analytics', icon: ChartBarIcon },
     { name: 'Profile', href: '/profile', icon: UserIcon },
-    { name: 'Settings', href: '/settings', icon: Cog6ToothIcon },
   ]
 
   const isActive = (href: string) => {
