@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '../../contexts/AuthContext'
 import { useRole } from '../../hooks/useRole'
@@ -44,13 +45,20 @@ interface RecentApplication {
 }
 
 export default function DashboardPage() {
+  const router = useRouter()
   const { user } = useAuth()
   const { isDeveloper, isEmployer } = useRole()
   const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
+    // Redirect unauthenticated users to login
+    if (!user) {
+      router.push('/login')
+      return
+    }
+    
     setIsVisible(true)
-  }, [])
+  }, [user, router])
 
   const stats: Stat[] = isDeveloper ? [
     { name: 'Applied Jobs', value: '12', change: '+3', changeType: 'positive', icon: BriefcaseIcon },

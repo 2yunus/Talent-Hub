@@ -1,6 +1,8 @@
 'use client'
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { apiService } from '../services/api'
+import { API_CONFIG } from '../config/api'
 
 interface User {
   id: string
@@ -66,19 +68,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const token = localStorage.getItem('authToken')
       if (token) {
         // Verify token with backend
-        const response = await fetch('/api/auth/profile', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        })
-        
-        if (response.ok) {
-          const userData = await response.json()
-          setUser(userData.user)
-        } else {
-          // Token is invalid, remove it
-          localStorage.removeItem('authToken')
-        }
+        const userData = await apiService.get<{ user: User }>(API_CONFIG.ENDPOINTS.AUTH.PROFILE)
+        setUser(userData.user)
       }
     } catch (error) {
       console.error('Auth check failed:', error)
@@ -93,25 +84,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setIsLoading(true)
       setError(null)
       
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email, password })
-      })
-      
-      const data = await response.json()
-      
-      if (!response.ok) {
-        throw new Error(data.error || 'Login failed')
-      }
+      const data = await apiService.post<{ token: string; user: User }>(
+        API_CONFIG.ENDPOINTS.AUTH.LOGIN, 
+        { email, password }
+      )
       
       // Store token and set user
       localStorage.setItem('authToken', data.token)
       setUser(data.user)
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Login failed')
+      const errorMessage = error instanceof Error ? error.message : 'Login failed'
+      setError(errorMessage)
       throw error
     } finally {
       setIsLoading(false)
@@ -123,25 +106,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setIsLoading(true)
       setError(null)
       
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(userData)
-      })
-      
-      const data = await response.json()
-      
-      if (!response.ok) {
-        throw new Error(data.error || 'Registration failed')
-      }
+      const data = await apiService.post<{ token: string; user: User }>(
+        API_CONFIG.ENDPOINTS.AUTH.REGISTER, 
+        userData
+      )
       
       // Store token and set user
       localStorage.setItem('authToken', data.token)
       setUser(data.user)
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Registration failed')
+      const errorMessage = error instanceof Error ? error.message : 'Registration failed'
+      setError(errorMessage)
       throw error
     } finally {
       setIsLoading(false)

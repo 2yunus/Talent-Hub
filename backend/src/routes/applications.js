@@ -227,7 +227,11 @@ router.get('/my', authenticateToken, requireDeveloper, applicationController.get
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
+// Existing path param endpoint
 router.get('/job/:jobId', authenticateToken, requireEmployer, applicationController.getJobApplications);
+
+// New optional jobId via query param to fetch all employer applications when omitted
+router.get('/job', authenticateToken, requireEmployer, applicationController.getEmployerApplications);
 
 /**
  * @swagger

@@ -4,40 +4,20 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useAuth } from '../../contexts/AuthContext'
 import { useRole } from '../../hooks/useRole'
+import { jobsService, Job, JobFilters } from '../../services/jobsService'
 import { 
   MagnifyingGlassIcon, 
   FunnelIcon, 
   MapPinIcon, 
   BriefcaseIcon, 
-  CurrencyDollarIcon,
   ClockIcon,
-  StarIcon,
   BookmarkIcon,
-  EyeIcon,
-  PlusIcon
+  PlusIcon,
+  XMarkIcon,
+  DocumentTextIcon
 } from '@heroicons/react/24/outline'
 
-interface Job {
-  id: string
-  title: string
-  company: string
-  location: string
-  type: string
-  experience: string
-  salary: {
-    min: number
-    max: number
-    currency: string
-  }
-  skills: string[]
-  isRemote: boolean
-  postedAt: string
-  applications: number
-  views: number
-  isActive: boolean
-  companyLogo?: string
-  description: string
-}
+// Job interface is now imported from jobsService
 
 export default function JobsPage() {
   const { user } = useAuth()
@@ -52,128 +32,215 @@ export default function JobsPage() {
   const [showFilters, setShowFilters] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [jobsPerPage] = useState(10)
+  const [appliedJobs, setAppliedJobs] = useState<Set<string>>(new Set())
+  const [bookmarkedJobs, setBookmarkedJobs] = useState<Set<string>>(new Set())
+  const [showApplicationModal, setShowApplicationModal] = useState(false)
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null)
+  const [applicationForm, setApplicationForm] = useState({
+    coverLetter: '',
+    resume: null as File | null
+  })
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Mock data for demonstration
-  useEffect(() => {
-    const mockJobs: Job[] = [
-      {
-        id: '1',
-        title: 'Senior Full-Stack Developer',
-        company: 'TechCorp Inc.',
-        location: 'San Francisco, CA',
-        type: 'FULL_TIME',
-        experience: 'SENIOR',
-        salary: { min: 120000, max: 180000, currency: 'USD' },
-        skills: ['React', 'Node.js', 'TypeScript', 'PostgreSQL'],
-        isRemote: true,
-        postedAt: '2024-01-15',
-        applications: 45,
-        views: 234,
-        isActive: true,
-        companyLogo: '/api/placeholder/60/60',
-        description: 'We are looking for a talented full-stack developer to join our growing team...'
-      },
-      {
-        id: '2',
-        title: 'Frontend Developer',
-        company: 'StartupXYZ',
-        location: 'New York, NY',
-        type: 'FULL_TIME',
-        experience: 'MID',
-        salary: { min: 80000, max: 120000, currency: 'USD' },
-        skills: ['React', 'Vue.js', 'JavaScript', 'CSS3'],
-        isRemote: false,
-        postedAt: '2024-01-14',
-        applications: 32,
-        views: 189,
-        isActive: true,
-        companyLogo: '/api/placeholder/60/60',
-        description: 'Join our dynamic team and help build amazing user experiences...'
-      },
-      {
-        id: '3',
-        title: 'DevOps Engineer',
-        company: 'CloudTech Solutions',
-        location: 'Austin, TX',
-        type: 'CONTRACT',
-        experience: 'SENIOR',
-        salary: { min: 100000, max: 150000, currency: 'USD' },
-        skills: ['Docker', 'Kubernetes', 'AWS', 'Terraform'],
-        isRemote: true,
-        postedAt: '2024-01-13',
-        applications: 28,
-        views: 156,
-        isActive: true,
-        companyLogo: '/api/placeholder/60/60',
-        description: 'Help us scale our infrastructure and improve deployment processes...'
-      },
-      {
-        id: '4',
-        title: 'Mobile App Developer',
-        company: 'AppWorks',
-        location: 'Seattle, WA',
-        type: 'FULL_TIME',
-        experience: 'JUNIOR',
-        salary: { min: 70000, max: 95000, currency: 'USD' },
-        skills: ['React Native', 'iOS', 'Android', 'JavaScript'],
-        isRemote: false,
-        postedAt: '2024-01-12',
-        applications: 67,
-        views: 298,
-        isActive: true,
-        companyLogo: '/api/placeholder/60/60',
-        description: 'Build amazing mobile experiences for millions of users...'
-      },
-      {
-        id: '5',
-        title: 'Data Scientist',
-        company: 'DataFlow Analytics',
-        location: 'Boston, MA',
-        type: 'FULL_TIME',
-        experience: 'MID',
-        salary: { min: 90000, max: 130000, currency: 'USD' },
-        skills: ['Python', 'Machine Learning', 'SQL', 'Statistics'],
-        isRemote: true,
-        postedAt: '2024-01-11',
-        applications: 23,
-        views: 145,
-        isActive: true,
-        companyLogo: '/api/placeholder/60/60',
-        description: 'Transform data into actionable insights for our clients...'
+    // Fetch jobs function
+  const fetchJobs = async () => {
+    console.log('Fetching jobs at:', new Date().toISOString())
+    console.log('Current user role - isDeveloper:', isDeveloper, 'isEmployer:', isEmployer)
+    try {
+      setIsLoading(true)
+      
+      if (isEmployer) {
+        // Employers see only their posted jobs
+        console.log('Fetching employer jobs for user:', user?.id, 'role:', user?.role)
+        const employerResponse = await jobsService.getEmployerJobs()
+        console.log('Employer jobs response:', employerResponse)
+        console.log('Response type:', typeof employerResponse)
+        console.log('Is array?', Array.isArray(employerResponse))
+        console.log('Response keys:', employerResponse && typeof employerResponse === 'object' ? Object.keys(employerResponse) : 'Not an object')
+        
+        if (Array.isArray(employerResponse)) {
+          console.log('Setting employer jobs:', employerResponse.length, 'jobs')
+          console.log('Jobs data:', employerResponse)
+          setJobs(employerResponse)
+          setFilteredJobs(employerResponse)
+        } else if (employerResponse && typeof employerResponse === 'object' && 'jobs' in employerResponse) {
+          // Handle case where response is { jobs: [...] }
+          const jobsArray = (employerResponse as any).jobs
+          console.log('Setting employer jobs from jobs property:', jobsArray.length, 'jobs')
+          console.log('Jobs data:', jobsArray)
+          setJobs(jobsArray)
+          setFilteredJobs(jobsArray)
+        } else {
+          console.warn('Unexpected employer jobs response structure:', employerResponse)
+          setJobs([])
+          setFilteredJobs([])
+        }
+               } else {
+           // Developers see all available jobs
+           const filters: JobFilters = {
+             search: searchQuery,
+             location: selectedLocation,
+             type: selectedType,
+             experience: selectedExperience,
+             page: currentPage,
+             limit: jobsPerPage
+           }
+           console.log('Developer filters:', filters)
+           const allJobsResponse = await jobsService.getJobs(filters)
+           console.log('All jobs response for developer:', allJobsResponse)
+           console.log('Response type:', typeof allJobsResponse)
+           console.log('Is array?', Array.isArray(allJobsResponse))
+           console.log('Response keys:', allJobsResponse && typeof allJobsResponse === 'object' ? Object.keys(allJobsResponse) : 'Not an object')
+           
+           // Handle paginated response from getJobs()
+           if (allJobsResponse && allJobsResponse.jobs && Array.isArray(allJobsResponse.jobs)) {
+             console.log('Setting jobs from paginated response:', allJobsResponse.jobs.length, 'jobs')
+             console.log('Jobs data:', allJobsResponse.jobs)
+             setJobs(allJobsResponse.jobs)
+             setFilteredJobs(allJobsResponse.jobs)
+           } else if (Array.isArray(allJobsResponse)) {
+             // Handle case where response is directly an array
+             console.log('Setting jobs from direct array response:', allJobsResponse.length, 'jobs')
+             console.log('Jobs data:', allJobsResponse)
+             setJobs(allJobsResponse)
+             setFilteredJobs(allJobsResponse)
+           } else {
+             console.warn('Unexpected all jobs response structure:', allJobsResponse)
+             setJobs([])
+             setFilteredJobs([])
+           }
       }
-    ]
+    } catch (error) {
+      console.error('Failed to fetch jobs:', error)
+      // Show more detailed error information
+      if (error instanceof Error) {
+        console.error('Error details:', error.message)
+        if (error.message.includes('Validation error')) {
+          console.error('This might be a backend validation issue. Check if the backend is running and has the expected schema.')
+        }
+        if (error.message.includes('401') || error.message.includes('Unauthorized')) {
+          console.error('Authentication error - user might not be logged in or token expired')
+        }
+        if (error.message.includes('403') || error.message.includes('Forbidden')) {
+          console.error('Access denied - user might not have employer role')
+        }
+        if (error.message.includes('404') || error.message.includes('Not Found')) {
+          console.error('Endpoint not found - check if backend is running and endpoint exists')
+        }
+      }
+      // Fallback to empty array on error
+      setJobs([])
+      setFilteredJobs([])
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
-    setJobs(mockJobs)
-    setFilteredJobs(mockJobs)
-    setIsLoading(false)
-  }, [])
-
-  // Filter jobs based on search and filters
+  // Fetch jobs from API
   useEffect(() => {
-    let filtered = jobs.filter(job => {
-      const matchesSearch = job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           job.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           job.skills.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase()))
-      
-      const matchesLocation = !selectedLocation || job.location.includes(selectedLocation)
-      const matchesType = !selectedType || job.type === selectedType
-      const matchesExperience = !selectedExperience || job.experience === selectedExperience
-      
-      return matchesSearch && matchesLocation && matchesType && matchesExperience
-    })
-    
-    setFilteredJobs(filtered)
-    setCurrentPage(1)
-  }, [jobs, searchQuery, selectedLocation, selectedType, selectedExperience])
+    fetchJobs()
+  }, [searchQuery, selectedLocation, selectedType, selectedExperience, currentPage, jobsPerPage, isEmployer, user?.id])
 
-  // Pagination
-  const indexOfLastJob = currentPage * jobsPerPage
-  const indexOfFirstJob = indexOfLastJob - jobsPerPage
-  const currentJobs = filteredJobs.slice(indexOfFirstJob, indexOfLastJob)
+  // Update filtered jobs when jobs change
+  useEffect(() => {
+    console.log('Jobs state updated:', jobs.length, 'jobs')
+    console.log('Jobs data:', jobs)
+    console.log('Setting filtered jobs to:', jobs.length, 'jobs')
+    setFilteredJobs(jobs)
+  }, [jobs])
+
+  // Pagination - using API response
+  const currentJobs = filteredJobs
   const totalPages = Math.ceil(filteredJobs.length / jobsPerPage)
+  
+  console.log('Current state - jobs:', jobs.length, 'filteredJobs:', filteredJobs.length, 'currentJobs:', currentJobs.length)
+  console.log('Current jobs data:', currentJobs)
 
-  const formatSalary = (salary: Job['salary']) => {
-    return `$${salary.min.toLocaleString()} - $${salary.max.toLocaleString()}`
+  const formatSalary = (salary: any) => {
+    if (!salary || typeof salary !== 'object') {
+      return 'Salary not specified'
+    }
+    
+    // Handle different salary formats from backend
+    if (salary.min && salary.max) {
+      return `$${salary.min.toLocaleString()} - $${salary.max.toLocaleString()}`
+    } else if (salary.amount) {
+      return `$${salary.amount.toLocaleString()}`
+    } else if (salary.range) {
+      return salary.range
+    } else {
+      return 'Salary not specified'
+    }
+  }
+
+  const handleApplyClick = (job: Job) => {
+    if (!user) {
+      // Redirect to login if not authenticated
+      window.location.href = '/login'
+      return
+    }
+    
+    setSelectedJob(job)
+    setShowApplicationModal(true)
+  }
+
+  const handleApplicationSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!selectedJob || !user) return
+
+    try {
+      setIsSubmitting(true)
+      
+      console.log('Applying to job:', selectedJob.id, applicationForm)
+      
+      // Create the application data
+      const applicationData = {
+        jobId: selectedJob.id,
+        coverLetter: applicationForm.coverLetter,
+        resume: applicationForm.resume ? applicationForm.resume.name : undefined
+      }
+      
+      // Submit to backend API
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/applications`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        },
+        body: JSON.stringify(applicationData)
+      })
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`)
+      }
+      
+      const result = await response.json()
+      console.log('Application submitted successfully:', result)
+      
+      // Mark job as applied
+      setAppliedJobs(prev => new Set(prev).add(selectedJob.id))
+      
+      // Close modal and reset form
+      setShowApplicationModal(false)
+      setSelectedJob(null)
+      setApplicationForm({ coverLetter: '', resume: null })
+      
+      // Show success message
+      alert('Application submitted successfully! Your application has been saved to the database.')
+      
+    } catch (error) {
+      console.error('Failed to submit application:', error)
+      alert(`Failed to submit application: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const closeApplicationModal = () => {
+    setShowApplicationModal(false)
+    setSelectedJob(null)
+    setApplicationForm({ coverLetter: '', resume: null })
   }
 
   const formatDate = (dateString: string) => {
@@ -249,12 +316,38 @@ export default function JobsPage() {
                 }
               </p>
             </div>
-            {isEmployer && (
-              <Link href="/post-job" className="btn-primary">
-                <PlusIcon className="w-5 h-5 mr-2" />
-                Post New Job
-              </Link>
-            )}
+                         {isEmployer && (
+               <>
+                 <Link href="/post-job" className="btn-primary">
+                   <PlusIcon className="w-5 h-5 mr-2" />
+                   Post New Job
+                 </Link>
+                 <button 
+                   onClick={() => {
+                     console.log('Force refresh clicked')
+                     console.log('Current jobs state:', jobs)
+                     console.log('Current filtered jobs state:', filteredJobs)
+                     fetchJobs()
+                   }}
+                   className="btn-outline ml-2"
+                 >
+                   Refresh Jobs
+                 </button>
+               </>
+             )}
+             {isDeveloper && (
+               <button 
+                 onClick={() => {
+                   console.log('Developer refresh clicked')
+                   console.log('Current jobs state:', jobs)
+                   console.log('Current filtered jobs state:', filteredJobs)
+                   fetchJobs()
+                 }}
+                 className="btn-outline"
+               >
+                 Refresh Jobs
+               </button>
+             )}
           </div>
         </div>
 
@@ -355,26 +448,33 @@ export default function JobsPage() {
           </div>
         </div>
 
-        {/* Jobs List */}
-        <div className="space-y-6">
-          {currentJobs.map((job) => (
+                 {/* Jobs List */}
+         <div className="space-y-6">
+           {currentJobs.map((job) => {
+             // Safety check for required fields
+             if (!job || !job.title || !job.companyName) {
+               console.warn('Invalid job data:', job)
+               return null
+             }
+             
+             return (
             <div key={job.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-all duration-300 hover:scale-[1.01] group">
               <div className="flex items-start space-x-4">
                 {/* Company Logo */}
                 <div className="flex-shrink-0">
-                                      <div className="w-16 h-16 bg-gradient-to-br from-primary-600 to-secondary-500 rounded-xl flex items-center justify-center text-white font-bold text-lg">
-                    {job.company.charAt(0)}
-                  </div>
+                                                         <div className="w-16 h-16 bg-gradient-to-br from-primary-600 to-secondary-500 rounded-xl flex items-center justify-center text-white font-bold text-lg">
+                     {job.companyName.charAt(0)}
+                   </div>
                 </div>
 
                 {/* Job Details */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <h3 className="text-xl font-semibold text-gray-900 group-hover:text-primary-600 transition-colors duration-200 cursor-pointer">
-                        {job.title}
-                      </h3>
-                      <p className="text-lg text-gray-600 mt-1">{job.company}</p>
+                                             <h3 className="text-xl font-semibold text-gray-900 group-hover:text-primary-600 transition-colors duration-200 cursor-pointer">
+                         {job.title}
+                       </h3>
+                       <p className="text-lg text-gray-600 mt-1">{job.companyName}</p>
                       
                       <div className="flex items-center space-x-4 mt-3 text-sm text-gray-500">
                         <div className="flex items-center space-x-1">
@@ -386,10 +486,10 @@ export default function JobsPage() {
                           <BriefcaseIcon className="w-4 h-4" />
                           <span className="capitalize">{job.type.replace('_', ' ').toLowerCase()}</span>
                         </div>
-                        <div className="flex items-center space-x-1">
-                          <ClockIcon className="w-4 h-4" />
-                          <span>{formatDate(job.postedAt)}</span>
-                        </div>
+                                                 <div className="flex items-center space-x-1">
+                           <ClockIcon className="w-4 h-4" />
+                           <span>{formatDate(job.createdAt)}</span>
+                         </div>
                       </div>
 
                       <div className="flex items-center space-x-2 mt-3">
@@ -401,20 +501,20 @@ export default function JobsPage() {
                         </span>
                       </div>
 
-                      <div className="flex flex-wrap gap-2 mt-3">
-                        {job.skills.slice(0, 4).map((skill) => (
-                          <span key={skill} className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
-                            {skill}
-                          </span>
-                        ))}
-                        {job.skills.length > 4 && (
-                          <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">
-                            +{job.skills.length - 4} more
-                          </span>
-                        )}
-                      </div>
+                                             <div className="flex flex-wrap gap-2 mt-3">
+                         {job.skills && Array.isArray(job.skills) && job.skills.slice(0, 4).map((skill) => (
+                           <span key={skill} className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
+                             {skill}
+                           </span>
+                         ))}
+                         {job.skills && Array.isArray(job.skills) && job.skills.length > 4 && (
+                           <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">
+                             +{job.skills.length - 4} more
+                           </span>
+                         )}
+                       </div>
 
-                      <p className="text-gray-600 mt-3 line-clamp-2">{job.description}</p>
+                                             <p className="text-gray-600 mt-3 line-clamp-2">{job.description || 'No description available'}</p>
                     </div>
 
                     {/* Right Side */}
@@ -424,29 +524,49 @@ export default function JobsPage() {
                         <div className="text-sm text-gray-500">per year</div>
                       </div>
                       
-                      <div className="flex items-center space-x-4 text-sm text-gray-500">
-                        <div className="flex items-center space-x-1">
-                          <EyeIcon className="w-4 h-4" />
-                          <span>{job.views}</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <StarIcon className="w-4 h-4" />
-                          <span>{job.applications}</span>
-                        </div>
-                      </div>
+                                             {/* Applications and views not available in backend response */}
 
                       <div className="flex space-x-2">
                         {isDeveloper ? (
                           <>
-                            <button className="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200">
+                            <button 
+                              onClick={() => {
+                                // Toggle bookmark state
+                                const newBookmarks = new Set(bookmarkedJobs)
+                                if (newBookmarks.has(job.id)) {
+                                  newBookmarks.delete(job.id)
+                                } else {
+                                  newBookmarks.add(job.id)
+                                }
+                                setBookmarkedJobs(newBookmarks)
+                              }}
+                              className={`p-2 rounded-lg transition-all duration-200 ${
+                                bookmarkedJobs.has(job.id) 
+                                  ? 'text-primary-600 bg-primary-50' 
+                                  : 'text-gray-400 hover:text-primary-600 hover:bg-primary-50'
+                              }`}
+                            >
                               <BookmarkIcon className="w-5 h-5" />
                             </button>
-                            <button className="btn-primary">Apply Now</button>
+                            {appliedJobs.has(job.id) ? (
+                              <button className="btn-outline bg-green-50 text-green-700 border-green-200" disabled>
+                                Applied ✓
+                              </button>
+                            ) : (
+                              <button 
+                                onClick={() => handleApplyClick(job)}
+                                className="btn-primary hover:bg-primary-700 transition-colors duration-200"
+                              >
+                                Apply Now
+                              </button>
+                            )}
                           </>
                         ) : (
                           <>
                             <button className="btn-outline">Edit</button>
-                            <button className="btn-primary">View Applications</button>
+                            <Link href="/applications" className="btn-primary">
+                              View Applications
+                            </Link>
                           </>
                         )}
                       </div>
@@ -455,7 +575,8 @@ export default function JobsPage() {
                 </div>
               </div>
             </div>
-          ))}
+            )
+          })}
         </div>
 
         {/* Pagination */}
@@ -515,6 +636,118 @@ export default function JobsPage() {
             >
               Clear Filters
             </button>
+          </div>
+        )}
+
+        {/* Application Modal */}
+        {showApplicationModal && selectedJob && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              {/* Modal Header */}
+              <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Apply to {selectedJob.title}</h2>
+                  <p className="text-gray-600 mt-1">{selectedJob.companyName}</p>
+                </div>
+                <button
+                  onClick={closeApplicationModal}
+                  className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+                >
+                  <XMarkIcon className="w-6 h-6" />
+                </button>
+              </div>
+
+              {/* Modal Body */}
+              <form onSubmit={handleApplicationSubmit} className="p-6 space-y-6">
+                {/* Job Summary */}
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h3 className="font-semibold text-gray-900 mb-2">Job Summary</h3>
+                  <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <span className="font-medium">Location:</span> {selectedJob.location}
+                      {selectedJob.isRemote && <span className="text-primary-600 ml-1">• Remote</span>}
+                    </div>
+                    <div>
+                      <span className="font-medium">Type:</span> {selectedJob.type.replace('_', ' ')}
+                    </div>
+                    <div>
+                      <span className="font-medium">Experience:</span> {selectedJob.experience}
+                    </div>
+                    <div>
+                      <span className="font-medium">Salary:</span> {formatSalary(selectedJob.salary)}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Cover Letter */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Cover Letter *
+                  </label>
+                  <textarea
+                    value={applicationForm.coverLetter}
+                    onChange={(e) => setApplicationForm(prev => ({ ...prev, coverLetter: e.target.value }))}
+                    required
+                    rows={6}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200"
+                    placeholder="Tell us why you're interested in this position and how your skills align with the job requirements..."
+                  />
+                </div>
+
+                {/* Resume Upload */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Resume
+                  </label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary-400 transition-colors duration-200">
+                    <DocumentTextIcon className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+                    <p className="text-gray-600 mb-2">Upload your resume (PDF, DOC, DOCX)</p>
+                    <input
+                      type="file"
+                      accept=".pdf,.doc,.docx"
+                      onChange={(e) => setApplicationForm(prev => ({ ...prev, resume: e.target.files?.[0] || null }))}
+                      className="hidden"
+                      id="resume-upload"
+                    />
+                    <label
+                      htmlFor="resume-upload"
+                      className="btn-outline cursor-pointer"
+                    >
+                      Choose File
+                    </label>
+                                         {applicationForm.resume && (
+                       <p className="text-sm text-primary-600 mt-2">Selected: {applicationForm.resume.name}</p>
+                     )}
+                  </div>
+                </div>
+
+                {/* Submit Button */}
+                <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+                  <button
+                    type="button"
+                    onClick={closeApplicationModal}
+                    className="btn-outline"
+                    disabled={isSubmitting}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn-primary"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></div>
+                        Submitting...
+                      </>
+                    ) : (
+                      'Submit Application'
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         )}
       </div>

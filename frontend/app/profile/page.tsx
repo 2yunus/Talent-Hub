@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { useAuth } from '../../contexts/AuthContext'
 import { useRole } from '../../hooks/useRole'
 import { 
@@ -16,6 +17,7 @@ import {
 } from '@heroicons/react/24/outline'
 
 export default function ProfilePage() {
+  const router = useRouter()
   const { user } = useAuth()
   const { isDeveloper, isEmployer } = useRole()
   const [isVisible, setIsVisible] = useState(false)
@@ -28,12 +30,28 @@ export default function ProfilePage() {
     phone: user?.phone || '',
     website: user?.website || '',
     github: user?.github || '',
-    linkedin: user?.linkedin || ''
+    linkedin: user?.linkedin || '',
+    // Employer-specific fields
+    companyName: (user as any)?.companyName || '',
+    companyDescription: (user as any)?.companyDescription || '',
+    industry: (user as any)?.industry || '',
+    companySize: (user as any)?.companySize || '',
+    // Developer-specific fields
+    skills: (user as any)?.skills || [],
+    experience: (user as any)?.experience || '',
+    education: (user as any)?.education || '',
+    resume: (user as any)?.resume || ''
   })
 
   useEffect(() => {
+    // Redirect unauthenticated users to login
+    if (!user) {
+      router.push('/login')
+      return
+    }
+    
     setIsVisible(true)
-  }, [])
+  }, [user, router])
 
   const handleInputChange = (field: string, value: string) => {
     setProfileData(prev => ({ ...prev, [field]: value }))
@@ -53,7 +71,17 @@ export default function ProfilePage() {
       phone: user?.phone || '',
       website: user?.website || '',
       github: user?.github || '',
-      linkedin: user?.linkedin || ''
+      linkedin: user?.linkedin || '',
+      // Employer-specific fields
+      companyName: (user as any)?.companyName || '',
+      companyDescription: (user as any)?.companyDescription || '',
+      industry: (user as any)?.industry || '',
+      companySize: (user as any)?.companySize || '',
+      // Developer-specific fields
+      skills: (user as any)?.skills || [],
+      experience: (user as any)?.experience || '',
+      education: (user as any)?.education || '',
+      resume: (user as any)?.resume || ''
     })
     setIsEditing(false)
   }
@@ -159,16 +187,110 @@ export default function ProfilePage() {
 
                 {/* Bio */}
                 <div className="form-group">
-                  <label className="form-label">Bio</label>
+                  <label className="form-label">
+                    {isDeveloper ? 'Bio' : 'Company Description'}
+                  </label>
                   <textarea
                     value={profileData.bio}
                     onChange={(e) => handleInputChange('bio', e.target.value)}
                     disabled={!isEditing}
                     rows={4}
                     className={`input ${!isEditing ? 'bg-gray-50' : ''}`}
-                    placeholder="Tell us about yourself..."
+                    placeholder={isDeveloper ? "Tell us about yourself..." : "Tell us about your company..."}
                   />
                 </div>
+
+                {/* Employer-specific fields */}
+                {isEmployer && (
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="form-group">
+                        <label className="form-label">Company Name</label>
+                        <input
+                          type="text"
+                          value={profileData.companyName}
+                          onChange={(e) => handleInputChange('companyName', e.target.value)}
+                          disabled={!isEditing}
+                          className={`input ${!isEditing ? 'bg-gray-50' : ''}`}
+                          placeholder="Your Company Inc."
+                        />
+                      </div>
+                      
+                      <div className="form-group">
+                        <label className="form-label">Industry</label>
+                        <input
+                          type="text"
+                          value={profileData.industry}
+                          onChange={(e) => handleInputChange('industry', e.target.value)}
+                          disabled={!isEditing}
+                          className={`input ${!isEditing ? 'bg-gray-50' : ''}`}
+                          placeholder="Technology, Healthcare, etc."
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="form-group">
+                      <label className="form-label">Company Size</label>
+                      <select
+                        value={profileData.companySize}
+                        onChange={(e) => handleInputChange('companySize', e.target.value)}
+                        disabled={!isEditing}
+                        className={`input ${!isEditing ? 'bg-gray-50' : ''}`}
+                      >
+                        <option value="">Select company size</option>
+                        <option value="1-10">1-10 employees</option>
+                        <option value="11-50">11-50 employees</option>
+                        <option value="51-200">51-200 employees</option>
+                        <option value="201-500">201-500 employees</option>
+                        <option value="500+">500+ employees</option>
+                      </select>
+                    </div>
+                  </>
+                )}
+
+                {/* Developer-specific fields */}
+                {isDeveloper && (
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="form-group">
+                        <label className="form-label">Experience</label>
+                        <input
+                          type="text"
+                          value={profileData.experience}
+                          onChange={(e) => handleInputChange('experience', e.target.value)}
+                          disabled={!isEditing}
+                          className={`input ${!isEditing ? 'bg-gray-50' : ''}`}
+                          placeholder="e.g., 5 years in web development"
+                        />
+                      </div>
+                      
+                      <div className="form-group">
+                        <label className="form-label">Education</label>
+                        <input
+                          type="text"
+                          value={profileData.education}
+                          onChange={(e) => handleInputChange('education', e.target.value)}
+                          disabled={!isEditing}
+                          className={`input ${!isEditing ? 'bg-gray-50' : ''}`}
+                          placeholder="e.g., BS Computer Science, Stanford University"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="form-group">
+                      <label className="form-label">Skills</label>
+                      <input
+                        type="text"
+                        value={Array.isArray(profileData.skills) ? profileData.skills.join(', ') : profileData.skills}
+                        onChange={(e) => handleInputChange('skills', e.target.value.split(',').map(s => s.trim()) as any)}
+                        disabled={!isEditing}
+                        className={`input ${!isEditing ? 'bg-gray-50' : ''}`}
+                        placeholder="JavaScript, React, Node.js, PostgreSQL"
+                      />
+                      <p className="text-sm text-gray-500 mt-1">Separate skills with commas</p>
+                    </div>
+                  </>
+                )}
 
                 {/* Contact Info */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

@@ -24,7 +24,6 @@ export default function RegisterPage() {
     password: '',
     confirmPassword: '',
     role: 'DEVELOPER',
-    companyName: '',
     termsAccepted: false
   })
   const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({})
@@ -68,9 +67,7 @@ export default function RegisterPage() {
       errors.confirmPassword = 'Passwords do not match'
     }
 
-    if (formData.role === 'EMPLOYER' && !formData.companyName.trim()) {
-      errors.companyName = 'Company name is required for employers'
-    }
+    // Company name validation removed - will be collected after registration
 
     if (!formData.termsAccepted) {
       errors.termsAccepted = 'You must accept the terms and conditions'
@@ -92,8 +89,9 @@ export default function RegisterPage() {
       lastName: formData.lastName,
       email: formData.email,
       password: formData.password,
-      role: formData.role,
-      ...(formData.role === 'EMPLOYER' && { companyName: formData.companyName })
+      role: formData.role
+      // Note: companyName will be handled separately after user creation
+      // as the backend registration schema doesn't include it
     }
 
     await register(userData)
@@ -253,23 +251,22 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            {/* Company Name (for employers) */}
+            {/* Company Information Note (for employers) */}
             {formData.role === 'EMPLOYER' && (
-              <div className="form-group">
-                <label className="form-label">Company Name *</label>
-                <div className="input-group">
-                  <BuildingOfficeIcon className="input-icon" />
-                  <input
-                    type="text"
-                    value={formData.companyName}
-                    onChange={(e) => handleInputChange('companyName', e.target.value)}
-                    className={`input pl-10 ${validationErrors.companyName ? 'border-red-300' : ''}`}
-                    placeholder="Your Company Inc."
-                  />
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-start space-x-3">
+                  <BuildingOfficeIcon className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-blue-800 text-sm font-medium">Company Setup</p>
+                    <p className="text-blue-700 text-sm mt-1">
+                      Company information will be collected after successful registration. 
+                      You'll be able to set up your company profile in the next step.
+                    </p>
+                    <p className="text-blue-600 text-xs mt-2">
+                      After registration, you can create your company profile and start posting jobs.
+                    </p>
+                  </div>
                 </div>
-                {validationErrors.companyName && (
-                  <p className="text-red-500 text-sm mt-1">{validationErrors.companyName}</p>
-                )}
               </div>
             )}
 

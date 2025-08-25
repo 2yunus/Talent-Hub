@@ -19,10 +19,10 @@ export default function Sidebar() {
   const { user } = useAuth()
 
   const navigation = [
-    { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
-    { name: 'Jobs', href: '/jobs', icon: BriefcaseIcon },
-    { name: 'Applications', href: '/applications', icon: EnvelopeIcon },
-    { name: 'Profile', href: '/profile', icon: UserIcon },
+    { name: 'Dashboard', href: '/dashboard', icon: HomeIcon, requiresAuth: true },
+    { name: 'Jobs', href: '/jobs', icon: BriefcaseIcon, requiresAuth: false },
+    { name: 'Applications', href: '/applications', icon: EnvelopeIcon, requiresAuth: true },
+    { name: 'Profile', href: '/profile', icon: UserIcon, requiresAuth: true },
   ]
 
   const isActive = (href: string) => {
@@ -53,6 +53,11 @@ export default function Sidebar() {
       {/* Navigation */}
       <nav className="p-4 space-y-2">
         {navigation.map((item) => {
+          // Skip navigation items that require authentication if user is not logged in
+          if (item.requiresAuth && !user) {
+            return null
+          }
+          
           const Icon = item.icon
           const active = isActive(item.href)
           

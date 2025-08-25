@@ -91,9 +91,9 @@ export default function HomePage() {
           <div className="text-center">
             <div className={`transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
               <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-6 leading-tight">
-                Find Your Next
+              Find Your Next
                 <span className="text-gradient block mt-2">Career Move</span>
-              </h1>
+            </h1>
               <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-4xl mx-auto leading-relaxed">
                 Connect with amazing opportunities and talented developers. Whether you're hiring or looking for your next role, 
                 <span className="text-primary-600 font-semibold"> TalentHub</span> is your gateway to success.
@@ -195,8 +195,8 @@ export default function HomePage() {
                 </div>
               )
             })}
-          </div>
-        </div>
+              </div>
+            </div>
       </section>
 
       {/* Interactive Demo Section */}
@@ -338,27 +338,27 @@ export default function HomePage() {
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
           }`}>
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              Ready to Get Started?
-            </h2>
+            Ready to Get Started?
+          </h2>
             <p className="text-xl text-primary-100 mb-8 max-w-2xl mx-auto leading-relaxed">
-              Join thousands of developers and companies already using TalentHub to find their perfect match. 
+            Join thousands of developers and companies already using TalentHub to find their perfect match.
               Start your journey today and discover endless possibilities.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link 
-                href="/register" 
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link 
+              href="/register" 
                 className="btn bg-white text-primary-600 hover:bg-gray-100 text-lg px-8 py-4 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
-              >
+            >
                 <SparklesIcon className="w-5 h-5 mr-2" />
-                Sign Up Free
-              </Link>
-              <Link 
-                href="/about" 
+              Sign Up Free
+            </Link>
+            <Link 
+              href="/about" 
                 className="btn border-2 border-white text-white hover:bg-white hover:text-primary-600 text-lg px-8 py-4 transition-all duration-300 hover:scale-105"
-              >
-                Learn More
+            >
+              Learn More
                 <ArrowRightIcon className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-200" />
-              </Link>
+            </Link>
             </div>
           </div>
         </div>

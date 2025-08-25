@@ -275,6 +275,102 @@ const getMyApplications = async (req, res) => {
   }
 };
 
+// Get all applications for employer's jobs (jobId optional)
+const getEmployerApplications = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { jobId, page = 1, limit = 10, status } = req.query;
+
+    if (req.user.role !== 'EMPLOYER') {
+      return res.status(403).json({
+        error: 'Access denied',
+        message: 'Only employers can view received applications'
+      });
+    }
+
+    const prisma = getPrisma(req);
+
+    // If jobId provided: validate ownership and filter by that job only
+    let where = {};
+    if (jobId) {
+      const job = await prisma.job.findUnique({ where: { id: jobId } });
+      if (!job) {
+        return res.status(404).json({ error: 'Job not found' });
+      }
+      if (job.postedById !== userId) {
+        return res.status(403).json({
+          error: 'Access denied',
+          message: 'You can only view applications for jobs you posted'
+        });
+      }
+      where.jobId = jobId;
+    } else {
+      // No jobId → get all jobs owned by employer and filter applications by those
+      const employerJobs = await prisma.job.findMany({
+        where: { postedById: userId },
+        select: { id: true }
+      });
+      const jobIds = employerJobs.map(j => j.id);
+      where.jobId = { in: jobIds };
+    }
+
+    if (status) {
+      where.status = status;
+    }
+
+    const skip = (page - 1) * limit;
+    const totalApplications = await prisma.application.count({ where });
+    const totalPages = Math.ceil(totalApplications / limit);
+
+    const applications = await prisma.application.findMany({
+      where,
+      include: {
+        job: {
+          select: {
+            id: true,
+            title: true,
+            companyName: true,
+            location: true,
+            type: true,
+            experience: true,
+            isRemote: true
+          }
+        },
+        applicant: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            avatar: true,
+            skills: true,
+            experience: true,
+            location: true
+          }
+        }
+      },
+      orderBy: { appliedAt: 'desc' },
+      skip,
+      take: parseInt(limit)
+    });
+
+    res.status(200).json({
+      applications,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages,
+        totalApplications,
+        hasNextPage: parseInt(page) < totalPages,
+        hasPrevPage: parseInt(page) > 1
+      }
+    });
+
+  } catch (error) {
+    console.error('Get employer applications error:', error);
+    res.status(500).json({ error: 'Internal server error while fetching applications' });
+  }
+};
+
 // Update application status (employer only)
 const updateApplicationStatus = async (req, res) => {
   try {
@@ -501,5 +597,7 @@ module.exports = {
   getMyApplications,
   updateApplicationStatus,
   withdrawApplication,
-  getApplicationById
+  getApplicationById,
+  // Added below
+  getEmployerApplications
 };
