@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: talenthub-backend
+    env: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install && npx prisma generate && npx prisma db push
+    startCommand: npm run start
+    autoDeploy: true
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: CORS_ORIGIN
+        value: http://localhost:3000
+      - key: JWT_SECRET
+        sync: false
+      - key: DATABASE_URL
+        fromDatabase: talenthub-db
+
+databases:
+  - name: talenthub-db
+    databaseName: talent_hub
+    plan: free
