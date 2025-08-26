@@ -12,6 +12,7 @@
     "test:swagger": "node test-swagger.js",
     "test:jobs": "node test-jobs.js",
     "test:all": "node test-all.js",
+    "setup": "node setup.js",
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push",
     "prisma:migrate": "prisma migrate dev",

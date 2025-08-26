@@ -77,19 +77,8 @@ cd talenthub
 ### 2. Install Dependencies
 
 ```bash
-# Install root dependencies
-npm install
-
-# Install frontend dependencies
-cd frontend
-npm install
-
-# Install backend dependencies
-cd ../backend
-npm install
-
-# Return to root
-cd ..
+# Install all dependencies at once
+npm run install:all
 ```
 
 ### 3. Environment Setup
@@ -98,6 +87,18 @@ cd ..
    ```bash
    cp env.example .env
    ```
+
+### 4. Run Setup Script (Prevents Prisma Errors!)
+
+```bash
+npm run setup
+```
+
+This automatically handles Prisma client generation and database setup.
+
+**Alternative**: Use the platform-specific setup scripts:
+- **Windows**: Double-click `setup.bat`
+- **Unix/Linux/macOS**: Run `./setup.sh`
 
 2. Update `.env` with your configuration:
    - Database connection string
@@ -143,6 +144,7 @@ npm run build            # Build both applications
 npm run install:all      # Install all dependencies
 
 # Database operations
+npm run setup            # Complete setup (recommended for new devices)
 npm run db:generate      # Generate Prisma client
 npm run db:push          # Push schema changes
 npm run db:migrate       # Run migrations
@@ -271,9 +273,40 @@ npm test
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🆘 Support
+## 🆘 Support & Troubleshooting
 
-- **Documentation**: Check the `/docs` folder
+### Common Issues
+
+#### Prisma Client Not Initialized
+If you see this error:
+```
+Error: @prisma/client did not initialize yet. Please run "prisma generate" and try to import it again.
+```
+
+**Quick Fix**: Run the setup script:
+```bash
+npm run setup
+```
+
+**Manual Fix**:
+```bash
+cd backend
+npm run prisma:generate
+```
+
+#### Database Connection Issues
+- Verify your `.env` file has correct `DATABASE_URL`
+- Ensure your database is running and accessible
+- Check firewall/network settings
+
+#### Port Already in Use
+- Change the port in `.env` file
+- Or kill the process using the port
+
+### Getting Help
+
+- **Quick Setup**: See [QUICK_SETUP.md](./docs/QUICK_SETUP.md) for new device setup
+- **Full Documentation**: Check the `/docs` folder
 - **Issues**: Create an issue on GitHub
 - **Discussions**: Use GitHub Discussions for questions
 - **Email**: Contact the development team
