@@ -54,6 +54,11 @@ const configureCors = () => {
       // Allow non-browser requests (no Origin header), e.g., health checks
       if (!origin) return callback(null, true);
 
+      // Allow all if '*' present
+      if (rawOrigins.includes('*')) {
+        return callback(null, true);
+      }
+
       const isAllowed = matchers.some((allowed) => {
         if (allowed instanceof RegExp) return allowed.test(origin);
         return origin === allowed;
@@ -69,6 +74,8 @@ const configureCors = () => {
 };
 
 app.use(cors(configureCors()));
+// Explicitly enable preflight across all routes
+app.options('*', cors(configureCors()));
 
 // Rate limiting
 const limiter = rateLimit({
