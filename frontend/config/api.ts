@@ -1,9 +1,17 @@
 // API Configuration
 export const API_CONFIG = {
-  // Backend base URL - can be overridden via environment variable
-  BASE_URL: typeof window !== 'undefined' 
-    ? (window as any).__API_BASE_URL || 'http://localhost:5000'
-    : 'http://localhost:5000',
+  // Backend base URL - can be set via NEXT_PUBLIC_API_BASE_URL or window.__API_BASE_URL
+  BASE_URL: (() => {
+    const fromEnv = process.env.NEXT_PUBLIC_API_BASE_URL;
+    if (fromEnv && fromEnv.length > 0) return fromEnv;
+    if (typeof window !== 'undefined') {
+      const fromWindow = (window as any).__API_BASE_URL;
+      if (fromWindow && typeof fromWindow === 'string' && fromWindow.length > 0) {
+        return fromWindow;
+      }
+    }
+    return 'http://localhost:5000';
+  })(),
   
   // API endpoints
   ENDPOINTS: {
