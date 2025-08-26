@@ -9,7 +9,7 @@ interface User {
   email: string
   firstName: string
   lastName: string
-  role: 'DEVELOPER' | 'EMPLOYER'
+  role: 'DEVELOPER' | 'EMPLOYER' | 'ADMIN'
   bio?: string
   location?: string
   skills?: string[]
