@@ -33,13 +33,42 @@ if (isProduction) {
   app.set('trust proxy', 1);
 }
 
-// CORS configuration
-const corsOptions = {
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
-  credentials: true,
-  optionsSuccessStatus: 200
+// CORS configuration (supports multiple origins and simple wildcards)
+const configureCors = () => {
+  const rawOrigins = (process.env.CORS_ORIGIN || 'http://localhost:3000').split(',').map(o => o.trim()).filter(Boolean);
+
+  // Convert wildcard entries like "https://*.vercel.app" to a check function
+  const matchers = rawOrigins.map((entry) => {
+    if (entry.includes('*')) {
+      // Escape dots, replace * with a subdomain matcher
+      const regexString = '^' + entry
+        .replace(/\./g, '\\.')
+        .replace(/\*/g, '[^.]+') + '$';
+      return new RegExp(regexString);
+    }
+    return entry;
+  });
+
+  return {
+    origin: (origin, callback) => {
+      // Allow non-browser requests (no Origin header), e.g., health checks
+      if (!origin) return callback(null, true);
+
+      const isAllowed = matchers.some((allowed) => {
+        if (allowed instanceof RegExp) return allowed.test(origin);
+        return origin === allowed;
+      });
+
+      if (isAllowed) return callback(null, true);
+      console.warn(`CORS blocked origin: ${origin}. Allowed: ${rawOrigins.join(', ')}`);
+      return callback(new Error('Not allowed by CORS'));
+    },
+    credentials: true,
+    optionsSuccessStatus: 200
+  };
 };
-app.use(cors(corsOptions));
+
+app.use(cors(configureCors()));
 
 // Rate limiting
 const limiter = rateLimit({
