@@ -14,7 +14,7 @@ class AdminService {
 
   // Get all users
   async listUsers(): Promise<{ users: any[] }> {
-    return apiService.get('/api/admin/users')
+    return apiService.get(API_CONFIG.ENDPOINTS.ADMIN.USERS)
   }
 
   async updateUserRole(id: string, role: 'ADMIN' | 'EMPLOYER' | 'DEVELOPER'): Promise<any> {
@@ -23,7 +23,7 @@ class AdminService {
 
   // Get all jobs
   async listJobs(): Promise<{ jobs: any[] }> {
-    return apiService.get('/api/admin/jobs')
+    return apiService.get(API_CONFIG.ENDPOINTS.ADMIN.JOBS)
   }
 
   async moderateJob(id: string, isActive: boolean): Promise<any> {
@@ -32,7 +32,7 @@ class AdminService {
 
   // Get all applications
   async listApplications(): Promise<{ applications: any[] }> {
-    return apiService.get('/api/admin/applications')
+    return apiService.get(API_CONFIG.ENDPOINTS.ADMIN.APPLICATIONS)
   }
 
   // Delete a user

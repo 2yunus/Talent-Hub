@@ -48,6 +48,14 @@ export const API_CONFIG = {
       RESUME: '/api/uploads/resume',
       COMPANY_LOGO: '/api/uploads/company-logo',
     },
+    
+    // Admin
+    ADMIN: {
+      STATS: '/api/admin/stats',
+      USERS: '/api/admin/users',
+      JOBS: '/api/admin/jobs',
+      APPLICATIONS: '/api/admin/applications',
+    },
   },
   
   // Request timeout (in milliseconds)
