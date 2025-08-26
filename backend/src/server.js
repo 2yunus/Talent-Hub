@@ -35,7 +35,11 @@ if (isProduction) {
 
 // CORS configuration (supports multiple origins and simple wildcards)
 const configureCors = () => {
-  const rawOrigins = (process.env.CORS_ORIGIN || 'http://localhost:3000').split(',').map(o => o.trim()).filter(Boolean);
+  const normalize = (url) => url.replace(/\/$/, '');
+  const rawOrigins = (process.env.CORS_ORIGIN || 'http://localhost:3000')
+    .split(',')
+    .map(o => normalize(o.trim()))
+    .filter(Boolean);
 
   // Convert wildcard entries like "https://*.vercel.app" to a check function
   const matchers = rawOrigins.map((entry) => {
@@ -59,9 +63,10 @@ const configureCors = () => {
         return callback(null, true);
       }
 
+      const normalizedOrigin = normalize(origin);
       const isAllowed = matchers.some((allowed) => {
         if (allowed instanceof RegExp) return allowed.test(origin);
-        return origin === allowed;
+        return normalizedOrigin === allowed;
       });
 
       if (isAllowed) return callback(null, true);
@@ -69,13 +74,20 @@ const configureCors = () => {
       return callback(new Error('Not allowed by CORS'));
     },
     credentials: true,
-    optionsSuccessStatus: 200
+    optionsSuccessStatus: 204,
+    methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
+    allowedHeaders: ['Content-Type','Authorization','Accept','Origin','X-Requested-With','Cache-Control']
   };
 };
 
 app.use(cors(configureCors()));
-// Explicitly enable preflight across all routes
-app.options('*', cors(configureCors()));
+// Explicit preflight handling across all routes
+app.options('*', (req, res, next) => {
+  const corsMiddleware = cors(configureCors());
+  corsMiddleware(req, res, () => {
+    res.sendStatus(204);
+  });
+});
 
 // Rate limiting
 const limiter = rateLimit({

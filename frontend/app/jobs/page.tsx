@@ -216,7 +216,7 @@ export default function JobsPage() {
       }
       
       // Submit to backend API
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/applications`, {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/applications`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
