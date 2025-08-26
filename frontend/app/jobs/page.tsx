@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { useAuth } from '../../contexts/AuthContext'
 import { useRole } from '../../hooks/useRole'
 import { jobsService, Job, JobFilters } from '../../services/jobsService'
+import { apiService } from '../../services/api'
+import { API_CONFIG } from '../../config/api'
 import { 
   MagnifyingGlassIcon, 
   FunnelIcon, 
@@ -193,11 +195,24 @@ export default function JobsPage() {
       
       console.log('Applying to job:', selectedJob.id, applicationForm)
       
+      // If a resume file is selected, upload it first to get a URL
+      let resumeUrl: string | undefined
+      if (applicationForm.resume) {
+        try {
+          const uploadResp: any = await apiService.upload(API_CONFIG.ENDPOINTS.UPLOADS.RESUME, applicationForm.resume, 'file')
+          // Expecting { file: { url, filename, ... } }
+          resumeUrl = uploadResp?.file?.url || uploadResp?.file?.filename
+          console.log('Resume uploaded. Using URL/filename:', resumeUrl)
+        } catch (uploadErr) {
+          console.warn('Resume upload failed, proceeding without resume:', uploadErr)
+        }
+      }
+
       // Create the application data
       const applicationData = {
         jobId: selectedJob.id,
         coverLetter: applicationForm.coverLetter,
-        resume: applicationForm.resume ? applicationForm.resume.name : undefined
+        resume: resumeUrl
       }
       
       // Submit to backend API

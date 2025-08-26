@@ -9,7 +9,8 @@ import {
   Bars3Icon, 
   XMarkIcon,
   MagnifyingGlassIcon,
-  BriefcaseIcon
+  BriefcaseIcon,
+  ShieldCheckIcon
 } from '@heroicons/react/24/outline'
 
 export default function Navigation() {
@@ -50,10 +51,17 @@ export default function Navigation() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link href="/jobs" className="nav-link group">
-              <BriefcaseIcon className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform duration-200" />
-              Jobs
-            </Link>
+            {user ? (
+              <Link href="/admin" className="nav-link group">
+                <ShieldCheckIcon className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform duration-200" />
+                Admin
+              </Link>
+            ) : (
+              <Link href="/jobs" className="nav-link group">
+                <BriefcaseIcon className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform duration-200" />
+                Jobs
+              </Link>
+            )}
           </div>
 
           {/* Search Bar */}
@@ -136,18 +144,29 @@ export default function Navigation() {
 
             {/* Mobile Navigation Links */}
             <div className="space-y-2">
-              <Link 
-                href="/jobs" 
-                className="block px-4 py-3 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <div className="flex items-center">
-                  <BriefcaseIcon className="w-5 h-5 mr-3" />
-                  Jobs
-                </div>
-              </Link>
-
-
+              {user ? (
+                <Link 
+                  href="/admin" 
+                  className="block px-4 py-3 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <div className="flex items-center">
+                    <ShieldCheckIcon className="w-5 h-5 mr-3" />
+                    Admin
+                  </div>
+                </Link>
+              ) : (
+                <Link 
+                  href="/jobs" 
+                  className="block px-4 py-3 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <div className="flex items-center">
+                    <BriefcaseIcon className="w-5 h-5 mr-3" />
+                    Jobs
+                  </div>
+                </Link>
+              )}
             </div>
 
             {/* Mobile Auth Buttons */}

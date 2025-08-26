@@ -63,6 +63,9 @@ const requireEmployer = requireRole(['EMPLOYER']);
 // Middleware to check if user is developer
 const requireDeveloper = requireRole(['DEVELOPER']);
 
+// Middleware to check if user is admin
+const requireAdmin = requireRole(['ADMIN']);
+
 // Middleware to check if user is either employer or developer
 const requireUser = requireRole(['EMPLOYER', 'DEVELOPER']);
 
@@ -126,6 +129,7 @@ module.exports = {
   requireRole,
   requireEmployer,
   requireDeveloper,
+  requireAdmin,
   requireUser,
   requireOwnership
 };

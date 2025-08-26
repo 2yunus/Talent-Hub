@@ -82,6 +82,7 @@ const authRoutes = require('./routes/auth');
 const jobRoutes = require('./routes/jobs');
 const applicationRoutes = require('./routes/applications');
 const userRoutes = require('./routes/users');
+const adminRoutes = require('./routes/admin');
 const uploadRoutes = require('./routes/uploads');
 
 // Make Prisma client available to middleware
@@ -110,6 +111,7 @@ app.use('/api/auth', injectPrisma, authRoutes);
 app.use('/api/jobs', injectPrisma, jobRoutes);
 app.use('/api/applications', injectPrisma, applicationRoutes);
 app.use('/api/users', injectPrisma, userRoutes);
+app.use('/api/admin', injectPrisma, adminRoutes);
 app.use('/api/uploads', injectPrisma, uploadRoutes);
 
 // 404 handler

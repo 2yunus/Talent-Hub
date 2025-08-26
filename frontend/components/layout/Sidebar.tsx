@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useAuth } from '../../contexts/AuthContext'
+import { ShieldCheckIcon } from '@heroicons/react/24/outline'
 import { 
   HomeIcon,
   BriefcaseIcon,
@@ -18,12 +19,21 @@ export default function Sidebar() {
   const pathname = usePathname()
   const { user } = useAuth()
 
+  // Hide entire sidebar for unauthenticated users
+  if (!user) {
+    return null
+  }
+
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: HomeIcon, requiresAuth: true },
-    { name: 'Jobs', href: '/jobs', icon: BriefcaseIcon, requiresAuth: false },
+    { name: 'Jobs', href: '/jobs', icon: BriefcaseIcon, requiresAuth: true },
     { name: 'Applications', href: '/applications', icon: EnvelopeIcon, requiresAuth: true },
     { name: 'Profile', href: '/profile', icon: UserIcon, requiresAuth: true },
   ]
+
+  if (user?.role === 'ADMIN') {
+    navigation.unshift({ name: 'Admin', href: '/admin', icon: ShieldCheckIcon as any, requiresAuth: true })
+  }
 
   const isActive = (href: string) => {
     if (href === '/dashboard') {
