@@ -12,8 +12,26 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Validate required environment variables
+const isProduction = (process.env.NODE_ENV || '').toLowerCase() === 'production';
+if (!process.env.JWT_SECRET) {
+  const missingSecretMessage = "Missing required env var JWT_SECRET. Set it in your environment (e.g., Render service env vars).";
+  if (isProduction) {
+    console.error(missingSecretMessage);
+    process.exit(1);
+  } else {
+    console.warn(missingSecretMessage);
+  }
+}
+
 // Security middleware
 app.use(helmet());
+
+// When behind a proxy/load balancer (e.g., Render), trust proxy so req.ip is correct
+// This prevents express-rate-limit from throwing when X-Forwarded-For is present
+if (isProduction) {
+  app.set('trust proxy', 1);
+}
 
 // CORS configuration
 const corsOptions = {
